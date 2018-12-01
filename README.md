@@ -18,3 +18,6 @@ To do
 - Totalen km's/uren per sport dit jaar + totaal.
 - H-index + plot
 - Sheet met alle activiteiten + link +data (max HR, TRIMP e.d.)
+- Sheet met alle segment klasseringen
+
+Ik denk dat die laatste 2 als eerst moet worden gedaan. Daaruit kan de rest worden gedaan. 
