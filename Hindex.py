@@ -1,7 +1,7 @@
 # 1-12-2018 Calculate H-index from run and rides.
 import stravalib
 from stravalib.client import Client
-import pprint
+  # import pprint
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -34,7 +34,6 @@ type = []
 
 activities = client.get_activities(limit=Act_count)
 for activity in activities:
-    print(f"Activity ID: {activity.distance}")
 
     # Here all the data that is wished to be saved
     athlete_count.append(float("{0.athlete_count}".format(activity)))
@@ -77,7 +76,7 @@ for i in range(len(type)):
 H_index_distance = sorted(H_index_distance, reverse=True)
 for i in range(len(H_index_distance)):
     if i > H_index_distance[i]:
-        H_index = i  # Give another thought about correctness.
+        H_index = i-1  # Outputs the H_index
         print(H_index)
         break
 
@@ -93,8 +92,11 @@ for i in range(int(max(H_index_distance))):
     H_index_cum.append(sum(j > (i + 1) for j in H_index_distance))
 
 plt.figure()
-plt.bar(x=list(range(0, int(max(H_index_distance)))),height=H_index_cum)
+plt.bar(x=np.add(list(range(0, int(max(H_index_distance)))),1),height=H_index_cum)
 plt.plot([0, max(H_index_distance)], [0, max(H_index_distance)],'r')  # Add the H-Index line
+plt.xlabel('Kilometers')
+plt.ylabel('Activity count')
+plt.title('Cumulative histogram')
 
 # Show plots
 plt.show()
