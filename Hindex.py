@@ -10,13 +10,14 @@ TOKEN = "123abc"  # Token here
 client = Client(access_token=TOKEN)
 
 # Variables
-Act_count = 50
+Act_count = []
 
 # Pre allocate the arrays
 athlete_count = []
 average_heartrate = []
 average_speed = []
 comment_count = []
+date = [] # ADD THIS
 distance = []
 elapsed_time = []
 flagged = []
@@ -28,6 +29,7 @@ moving_time = []
 name = []
 pr_count = []
 total_photo_count = []
+start_time = [] # ADD THIS
 type = []
 
 activities = client.get_activities(limit=Act_count)
@@ -65,7 +67,7 @@ Data is now available. Might be an idea to save this later. For now, try to
 get only the 'Ride' or 'Run' activities and calculate the H-index
 '''
 
-H_index_type = 'Ride' # Run or ride here
+H_index_type = 'Run' # Run or ride here
 H_index_distance = []
 for i in range(len(type)):
     if type[i] == H_index_type:
@@ -75,15 +77,24 @@ for i in range(len(type)):
 H_index_distance = sorted(H_index_distance, reverse=True)
 for i in range(len(H_index_distance)):
     if i > H_index_distance[i]:
-        H_index = i-1
+        H_index = i  # Give another thought about correctness.
+        print(H_index)
         break
 
-plt.hist(H_index_distance) # Tweak these parameters
+plt.figure()
+plt.hist(H_index_distance)  # Tweak these parameters
 plt.xlabel('Kilometers')
 plt.ylabel('Activity count')
 plt.title('Histogram of activities')
-# plt.plot([0,len(H_index_distance)],[0,len(H_index_distance)]) # Add the H-Index line
-# Before adding this line, summing is needed.
-plt.show()
 
-test= 100
+# Calculate the amount of activities for each bin
+H_index_cum = []
+for i in range(int(max(H_index_distance))):
+    H_index_cum.append(sum(j > (i + 1) for j in H_index_distance))
+
+plt.figure()
+plt.bar(x=list(range(0, int(max(H_index_distance)))),height=H_index_cum)
+plt.plot([0, max(H_index_distance)], [0, max(H_index_distance)],'r')  # Add the H-Index line
+
+# Show plots
+plt.show()
