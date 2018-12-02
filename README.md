@@ -7,7 +7,12 @@ pprint
 simplekml
 numpy
 time
+matplotlib
 
+Flow:
+1. Download all data and save as alldata(.csv?)
+2. Download data since last time and update alldata(.csv?)
+3. Do the things with the alldata file.
 
 To do
 - Alle top 10 segmenten in lijst
