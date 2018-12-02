@@ -59,7 +59,7 @@ print('Get streams and print save to KML')
 PART II: get the activity stream and add it to the kml
 '''
 for x in range(len(IDs)):
-    if x % 500 == 0 and x > 1:
+    if x % 500 == 0 and x > 1:  # To prevent exceeding strava limits
         print('Waiting for STRAVA API limits. Get a coffee!')
         print(time.localtime())
         time.sleep(900)
