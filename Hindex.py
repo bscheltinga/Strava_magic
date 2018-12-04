@@ -10,7 +10,7 @@ TOKEN = "123abc"  # Token here
 client = Client(access_token=TOKEN)
 
 # Variables
-Act_count = []
+Act_count = [10]
 
 # Pre allocate the arrays
 athlete_count = []
