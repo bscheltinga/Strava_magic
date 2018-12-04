@@ -1,8 +1,6 @@
 from stravalib import Client
-from tqdm import tqdm
 import pandas as pd
 import os.path
-from datetime import datetime
 
 class DataHandler(object):
     def __init__(self, token, datafolder='data'):
@@ -63,14 +61,4 @@ class DataHandler(object):
         df = df.iloc[::-1]
         print('**FULL SYNC** resulted in datafile with %i activities' % (i + 1))
         df.to_excel(self.__activitiesfile)
-
-# This code wil be removed, now for testing the object
-
-with open(r'tokens\user_access.token', 'r') as file:
-    user_token = file.read()
-#create dataHandler object
-data = DataHandler(user_token,  r'data')
-#sync data
-data.sync()
-
 
