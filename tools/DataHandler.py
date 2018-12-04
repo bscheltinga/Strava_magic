@@ -34,7 +34,7 @@ class DataHandler(object):
         if not os.path.isdir(self.__datafolder):
             os.mkdir(self.__datafolder)
         if os.path.isfile(self.__activitiesfile):
-            df = pd.read_excel(self.__activitiesfile)
+            df = self.get_data()
             self.__update(df)
         else:
             self.full_sync()
@@ -62,3 +62,6 @@ class DataHandler(object):
         print('**FULL SYNC** resulted in datafile with %i activities' % (i + 1))
         df.to_excel(self.__activitiesfile)
 
+    def get_data(self):
+        df = pd.read_excel(self.__activitiesfile)
+        return(df)
