@@ -5,10 +5,10 @@ import os.path
 from datetime import datetime
 
 class DataHandler(object):
-    def __init__(self, token, datapath=''):
+    def __init__(self, token, datafolder='data'):
         self.__token = token
-        self.__datapath = datapath
-
+        self.__datafolder = datafolder
+        self.__activitiesfile = os.path.join(self.__datafolder,'activities.xlsx')
         #Initialize client
         self.__connect(token)
 
@@ -33,38 +33,44 @@ class DataHandler(object):
                    }
         return datarow
     def sync(self):
-        if os.path.isfile(self.__datapath):
-            df = pd.read_excel(self.__datapath)
+        if not os.path.isdir(self.__datafolder):
+            os.mkdir(self.__datafolder)
+        if os.path.isfile(self.__activitiesfile):
+            df = pd.read_excel(self.__activitiesfile)
             self.__update(df)
         else:
             self.full_sync()
     def __update(self, df):
-        i=0
+        i = -1
         latest = pd.to_datetime(df['start_date']).max()
         activities = self.__api.get_activities(after=latest)
         for i, activity in enumerate(activities):
             entry = self.__handleActivity(activity)
             df = df.append(entry, ignore_index=True)
-        print('Updated datafile with %i new activities' %(i+1))
-        df.to_excel(r'data\activities.xlsx')
+        print('**UPDATED** datafile with %i new activities' %(i+1))
+        df.to_excel(self.__activitiesfile)
 
     def full_sync(self):
+        i = -1
         df = pd.DataFrame()
         activities = self.__api.get_activities(limit=8)
-        for activity in activities:
+        for i, activity in enumerate(activities):
             entry = self.__handleActivity(activity)
             df = df.append(entry, ignore_index=True)
         # reverse index so latest has highest number
         df.index = reversed(range(len(df)))
         #flip list so lastest is on the bottom
         df = df.iloc[::-1]
-        df.to_excel(r'data\activities.xlsx')
+        print('**FULL SYNC** resulted in datafile with %i activities' % (i + 1))
+        df.to_excel(self.__activitiesfile)
 
 # This code wil be removed, now for testing the object
 
 with open(r'tokens\user_access.token', 'r') as file:
     user_token = file.read()
-data = DataHandler(user_token,  r'data\activities.xlsx')
+#create dataHandler object
+data = DataHandler(user_token,  r'data')
+#sync data
 data.sync()
 
 
