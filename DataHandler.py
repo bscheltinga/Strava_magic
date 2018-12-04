@@ -1,9 +1,11 @@
 from stravalib import Client
 from tqdm import tqdm
 import pandas as pd
+import os.path
+from datetime import datetime
 
 class DataHandler(object):
-    def __init__(self, token, datapath):
+    def __init__(self, token, datapath=''):
         self.__token = token
         self.__datapath = datapath
 
@@ -27,23 +29,42 @@ class DataHandler(object):
                    'pr_count' : int(activity.pr_count),
                    'total_photo_count' : int(activity.total_photo_count),
                    'type' : str(activity.type),
-                   'start_date' : str(activity.start_date)
+                   'start_date' : activity.start_date.strftime('%Y-%m-%d %H:%M:%S')
                    }
         return datarow
+    def sync(self):
+        if os.path.isfile(self.__datapath):
+            df = pd.read_excel(self.__datapath)
+            self.__update(df)
+        else:
+            self.full_sync()
+    def __update(self, df):
+        i=0
+        latest = pd.to_datetime(df['start_date']).max()
+        activities = self.__api.get_activities(after=latest)
+        for i, activity in enumerate(activities):
+            entry = self.__handleActivity(activity)
+            df = df.append(entry, ignore_index=True)
+        print('Updated datafile with %i new activities' %(i+1))
+        df.to_excel(r'data\activities.xlsx')
 
     def full_sync(self):
         df = pd.DataFrame()
         activities = self.__api.get_activities(limit=8)
-        for activity in tqdm(activities):
+        for activity in activities:
             entry = self.__handleActivity(activity)
             df = df.append(entry, ignore_index=True)
-        df.to_excel('test.xlsx')
+        # reverse index so latest has highest number
+        df.index = reversed(range(len(df)))
+        #flip list so lastest is on the bottom
+        df = df.iloc[::-1]
+        df.to_excel(r'data\activities.xlsx')
 
 # This code wil be removed, now for testing the object
 
 with open(r'tokens\user_access.token', 'r') as file:
     user_token = file.read()
-data = DataHandler(user_token,  '')
-data.full_sync()
+data = DataHandler(user_token,  r'data\activities.xlsx')
+data.sync()
 
 
