@@ -39,19 +39,21 @@ class DataHandler(object):
         else:
             self.full_sync()
     def __update(self, df):
+        print('**UPDATING**')
         i = -1
         latest = pd.to_datetime(df['start_date']).max()
         activities = self.__api.get_activities(after=latest)
         for i, activity in enumerate(activities):
             entry = self.__handleActivity(activity)
             df = df.append(entry, ignore_index=True)
-        print('**UPDATED** datafile with %i new activities' %(i+1))
+        print('resulted in datafile with %i new activities' %(i+1))
         df.to_excel(self.__activitiesfile)
 
     def full_sync(self):
+        print('**FULL SYNC**')
         i = -1
         df = pd.DataFrame()
-        activities = self.__api.get_activities(limit=8)
+        activities = self.__api.get_activities()
         for i, activity in enumerate(activities):
             entry = self.__handleActivity(activity)
             df = df.append(entry, ignore_index=True)
@@ -59,7 +61,7 @@ class DataHandler(object):
         df.index = reversed(range(len(df)))
         #flip list so lastest is on the bottom
         df = df.iloc[::-1]
-        print('**FULL SYNC** resulted in datafile with %i activities' % (i + 1))
+        print('resulted in datafile with %i activities' % (i + 1))
         df.to_excel(self.__activitiesfile)
 
     def get_data(self):
