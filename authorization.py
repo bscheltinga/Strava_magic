@@ -10,11 +10,6 @@ def UseCode(code):
   #Retrieve the login code from the Strava server
   access_token = client.exchange_code_for_token(client_id=client_id,
                                                 client_secret=secret, code=code)
-  # Now store that access token somewhere (for now, it's just a local variable)
-  client.acces_token = access_token
-  athlete = client.get_athlete()
-  print("For %(id)s, I now have an access token %(token)s" %
-        {'id': athlete.id, 'token': access_token})
   return access_token
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -42,21 +37,13 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       with open(r'tokens\user_access.token', 'w') as file:
           file.write(token)
 
-  def get_token(self):
-    return(self._token)
-
-
-
 if __name__=='__main__':
-    #Global Variables - put your data in the file 'client.secret' and separate the fields with a comma!
+    #Put your data in file 'tokens/client.token' and separate the fields with a comma: clientid,clientsecrettoken
     with open(r'tokens\client.token', 'r') as file:
         client_secret = file.read().split(',')
     client_id, secret = client_secret[0], client_secret[1]
     port = 8008
     url = 'http://localhost:%d/authorization' % port
-    allDone = False
-    types = ['time', 'distance', 'latlng', 'altitude', 'velocity_smooth', 'moving', 'grade_smooth', 'temp']
-    limit = 10
 
     #Create the strava client, and open the web browser for authentication
     client = stravalib.client.Client()
