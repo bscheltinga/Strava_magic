@@ -26,5 +26,7 @@ To do
 - Sheet met alle segment klasseringen
 - Update de KML voor run, ride en gecombineerd.
 - Week samenvatting. Hoe veel uur in welke zones e.d. (via Jonas)
+- Autocorrelation 
+- Correlation score from 1 week.
 
 Ik denk dat die laatste 2 als eerst moet worden gedaan. Daaruit kan de rest worden gedaan. 
