@@ -21,11 +21,13 @@ class DataHandler(object):
             os.mkdir(self.__datafolder)
 
     def __handleActivity(self, activity):
-        datarow = {'average_speed' : float(activity.average_speed),
+        datarow = {'average_heartrate' : activity.average_heartrate,
+                   'average_speed' : float(activity.average_speed),
                    'comment_count' : int(activity.comment_count),
                    'distance' : float(activity.distance),
                    'elapsed_time' : str(activity.elapsed_time),
                    'flagged' : str(activity.flagged),
+                   'has_heartrate' : str(activity.has_heartrate),
                    'id' : int(activity.id),
                    'kudos_count': int(activity.kudos_count),
                    'max_speed' : float(activity.max_speed),
