@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 def h_index(df, figures=False):
     # 1-12-2018 Calculate H-index from run and rides.
@@ -9,7 +10,6 @@ def h_index(df, figures=False):
     for i in range(len(H_index_distance)):
         if i > H_index_distance[i]:
             H_index = i-1  # Outputs the H_index
-            print(H_index)
             break
     if figures:
         plt.figure()
@@ -33,3 +33,17 @@ def h_index(df, figures=False):
         plt.show()
 
     return H_index
+
+def totals(df):
+    distance = df['distance'].sum()/1000
+    elapsed_time = pd.to_timedelta(df['elapsed_time']).sum()
+    kudos = df['kudos_count'].sum()
+    moving_time = pd.to_timedelta(df['moving_time']).sum()
+    avg_kudos = df['kudos_count'].mean()
+    output = {'distance' : distance,
+              'elapsed_time' : elapsed_time,
+              'kudos' : kudos,
+              'moving_time' : moving_time,
+              'avg_kudos' : avg_kudos}
+
+    return output
