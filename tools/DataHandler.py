@@ -46,7 +46,7 @@ class DataHandler(object):
             self.__update(df)
         else:
             self.full_sync()
-            
+
     def __update(self, df):
         print('**UPDATING**')
         i = -1
