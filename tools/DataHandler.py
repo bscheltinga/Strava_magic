@@ -30,14 +30,14 @@ class DataHandler(object):
                    'start_date' : activity.start_date.strftime('%Y-%m-%d %H:%M:%S')
                    }
         return datarow
-    def sync(self):
-        if not os.path.isdir(self.__datafolder):
-            os.mkdir(self.__datafolder)
-        if os.path.isfile(self.__activitiesfile):
+
+    def sync(self, force=False):
+        if os.path.isfile(self.__activitiesfile) and not force:
             df = self.get_data()
             self.__update(df)
         else:
             self.full_sync()
+            
     def __update(self, df):
         print('**UPDATING**')
         i = -1
