@@ -6,7 +6,6 @@ import sys
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   #Handle the web data sent from the strava API
-  access_token = []
   def do_HEAD(self):
     return self.do_GET()
 
@@ -52,9 +51,8 @@ def authorize():
                                    scope='activity:read_all')
     print('Opening: %s' % authorize_url)
     webbrowser.open(authorize_url)
-    a = MyHandler
     try:
-        httpd = BaseHTTPServer.HTTPServer(('localhost', port), a)
+        httpd = BaseHTTPServer.HTTPServer(('localhost', port), MyHandler)
         httpd.handle_request()
     except KeyboardInterrupt:
                     # Allow ^C to interrupt from any thread.
