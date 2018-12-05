@@ -47,3 +47,11 @@ def totals(df):
               'avg_kudos' : avg_kudos}
 
     return output
+
+def hr_vs_speed(df):
+    df = df.loc[df['has_heartrate'] == True]
+    speed = np.array(df['average_speed'].tolist())*3.6
+    hr = df['average_heartrate'].tolist()
+    plt.plot(speed,hr,'r*')
+    plt.show()
+
