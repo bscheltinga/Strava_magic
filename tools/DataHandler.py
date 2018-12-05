@@ -7,11 +7,18 @@ class DataHandler(object):
         self.__token = token
         self.__datafolder = datafolder
         self.__activitiesfile = os.path.join(self.__datafolder,'activities.xlsx')
-        #Initialize client
+
+        #Setup folders
+        self.__setupfolders()
+        #Initialize api client
         self.__connect(token)
 
     def __connect(self, token):
         self.__api = Client(access_token=token)
+
+    def __setupfolders(self):
+        if not os.path.isdir(self.__datafolder):
+            os.mkdir(self.__datafolder)
 
     def __handleActivity(self, activity):
         datarow = {'average_speed' : float(activity.average_speed),
