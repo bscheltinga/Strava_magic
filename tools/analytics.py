@@ -39,7 +39,7 @@ def totals(df):
     elapsed_time = pd.to_timedelta(df['elapsed_time']).sum()
     kudos = df['kudos_count'].sum()
     moving_time = pd.to_timedelta(df['moving_time']).sum()
-    avg_kudos = df['kudos_count'].mean()
+    avg_kudos = df['kudos_count'].mean() # Here devided by the amount of not private activities.
     output = {'distance' : distance,
               'elapsed_time' : elapsed_time,
               'kudos' : kudos,
