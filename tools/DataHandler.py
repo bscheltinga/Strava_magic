@@ -22,14 +22,16 @@ class DataHandler(object):
 
     def __handleActivity(self, activity):
         datarow = {'average_heartrate' : activity.average_heartrate,
+                   'max_heartrate' : activity.max_heartrate,
                    'average_speed' : float(activity.average_speed),
                    'comment_count' : int(activity.comment_count),
                    'distance' : float(activity.distance),
                    'elapsed_time' : str(activity.elapsed_time),
                    'flagged' : str(activity.flagged),
+                   'manual': str(activity.manual),
                    'has_heartrate' : str(activity.has_heartrate),
                    'id' : int(activity.id),
-                   'kudos_count': int(activity.kudos_count),
+                   'kudos_count' : int(activity.kudos_count),
                    'max_speed' : float(activity.max_speed),
                    'moving_time' : str(activity.moving_time),
                    'name': str(activity.name),
