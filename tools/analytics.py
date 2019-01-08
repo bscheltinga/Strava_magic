@@ -3,16 +3,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 def h_index(df, figures=False):
-    # 1-12-2018 Calculate H-index from the distance over a full day
-    # Calculate the distance for each day
-    date = np.array(df['start_date'].tolist())
-    test = np.ndarray.tolist(date)
-    for i in range(len(date)):
-        test[i] = test[i].split(' ', 1)[0]
-
-
-
     # Calculate index
+    H_index = 0
     H_index_distance = np.array(df['distance'].tolist())/1000
     # Determine the H-index
     H_index_distance = sorted(H_index_distance, reverse=True)

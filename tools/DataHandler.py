@@ -40,7 +40,8 @@ class DataHandler(object):
                    'type' : str(activity.type),
                    'start_date' : activity.start_date.strftime('%Y-%m-%d %H:%M:%S'),
                    'athlete_count' : int(activity.athlete_count),
-                   'gear_id': str(activity.gear_id)
+                   'gear_id': str(activity.gear_id),
+                   'private' : str(activity.private)
                    }
         return datarow
 
