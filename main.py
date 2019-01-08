@@ -1,6 +1,7 @@
 import tools.DataHandler as dh
 import tools.analytics as anal
 import tools.authorization as auth
+import tools.segments as seg
 import tools.kmlmap as kmlmap
 import os
 import time
@@ -32,8 +33,7 @@ for sport in ['Ride', 'Run', 'Swim']:
     time = str(totals['elapsed_time'])
     print('{} totals: distance={:.2f}, kudos={}, avg_kudos={:.2f}, elapsed time={}'.format(sport, totals['distance'], totals['kudos'], totals['avg_kudos'], time))
 
-anal.hr_vs_speed(df.loc[df['type'] == 'Ride'])
-
+seg.segmentlist(access_token, df.loc[df['manual'] == 0])
 #Create KML map for heatmap
 # kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
 
