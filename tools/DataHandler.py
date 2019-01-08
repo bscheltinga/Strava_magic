@@ -38,7 +38,9 @@ class DataHandler(object):
                    'pr_count' : int(activity.pr_count),
                    'total_photo_count' : int(activity.total_photo_count),
                    'type' : str(activity.type),
-                   'start_date' : activity.start_date.strftime('%Y-%m-%d %H:%M:%S')
+                   'start_date' : activity.start_date.strftime('%Y-%m-%d %H:%M:%S'),
+                   'athlete_count' : int(activity.athlete_count),
+                   'gear_id': str(activity.gear_id)
                    }
         return datarow
 

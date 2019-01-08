@@ -2,10 +2,14 @@ import tools.DataHandler as dh
 import tools.analytics as anal
 import tools.authorization as auth
 import tools.kmlmap as kmlmap
+import tools.segments as seg
 import os
+from stravalib import Client
+
+
 #Check if user_access token is available, otherwise do authorisation first.
 if not os.path.isfile(r'tokens\user_access.token'):
-   auth.authorize()
+   auth.authorize() # add here something to do this for the right client_id
 with open(r'tokens\user_access.token', 'r') as file:
     user_token = file.read()
 # create dataHandler object
@@ -25,7 +29,8 @@ df = data.get_data()
 #
 # anal.hr_vs_speed(df.loc[df['type'] == 'Ride'])
 
-#Create KML map for heatmap
-kmlmap.create_kml(user_token, df.loc[df['type'] == 'Ride'])
-
-
+# Create KML map for heatmap
+# kmlmap.create_kml(user_token, df.loc[df['manual'] == 0])
+df_segments = seg.segmentlist(user_token, df.loc[df['manual'] == 0])
+Hindex = anal.h_index(df,False)
+print(Hindex)

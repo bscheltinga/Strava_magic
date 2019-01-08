@@ -18,16 +18,18 @@ def segmentlist(user_token, df):
         # Get from each activity the ridden/ran segments
         last_act = client.get_activity(activity_id= id, include_all_efforts=True)
         for i in range(len(last_act.segment_efforts)):
-            entry = {'id' : last_act.segment_efforts[i].id,
+            entry = {'id' : last_act.segment_efforts[i].segment.id,
                      'name' : last_act.segment_efforts[i].name}
             df_segments = df_segments.append(entry, ignore_index=True)
-
         print(idx)
 
-    df_segments.drop_duplicates(['name'], keep='last')
-    writer = pd.ExcelWriter('Segments.xlsx')
-    df_segments.to_excel(writer)
-    writer.save()
+        if idx > 999:
+
+            df_segments.drop_duplicates()
+            writer = pd.ExcelWriter('Segments.xlsx')
+            df_segments.to_excel(writer)
+            writer.save()
+            break
 
     return df_segments
     # To get the segment standings:

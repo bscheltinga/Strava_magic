@@ -28,6 +28,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       access_token = token
       with open(r'tokens\user_access.token', 'w') as file:
           file.write(token)
+
 def useCode(code):
   # Put your data in file 'tokens/client.token' and separate the fields with a comma: clientid,clientsecrettoken
   with open(r'tokens\client.token', 'r') as file:
@@ -45,7 +46,7 @@ def authorize():
 
     #Create the strava client, and open the web browser for authentication
     client = stravalib.client.Client()
-    authorize_url = client.authorization_url(client_id=30613,
+    authorize_url = client.authorization_url(client_id=28605,
                                    redirect_uri=url,
                                    approval_prompt='auto',
                                    scope='activity:read_all')
