@@ -28,5 +28,5 @@ To do
 - Week samenvatting. Hoe veel uur in welke zones e.d. (via Jonas)
 - Autocorrelation 
 - Correlation score from 1 week.
-
-Ik denk dat die laatste 2 als eerst moet worden gedaan. Daaruit kan de rest worden gedaan. 
+- Emoticon usage in title
+- Word usage in title
