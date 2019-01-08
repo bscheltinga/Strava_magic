@@ -9,8 +9,8 @@ def segmentlist(user_token, df):
     client = Client(access_token=user_token)
     df_segments = pd.DataFrame()
     idx = 0
-    for a, row in tqdm(df.iterrows(), total=df.shape[0],desc='Creating all ridden segments list'):
-        if idx % 500 == 0 and idx > 1:  # To prevent exceeding strava limits
+    for a, row in tqdm(df.iterrows(), total=df.shape[0],desc='Creating all segments list'):
+        if idx % 550 == 0 and idx > 1:  # To prevent exceeding strava limits
             print('Waiting for STRAVA API limits.')
             time.sleep(900)
         id = row['id']
@@ -21,12 +21,11 @@ def segmentlist(user_token, df):
             entry = {'id' : last_act.segment_efforts[i].segment.id,
                      'name' : last_act.segment_efforts[i].name}
             df_segments = df_segments.append(entry, ignore_index=True)
-
-        if idx > 3:
-            df_segments.drop_duplicates()
-            df_segments.to_excel(r'data\Segments.xlsx')
-            break
         idx += 1
+        if idx == 50:
+            break
+    df_segments = df_segments.drop_duplicates()
+    df_segments.to_excel(r'data\Segments.xlsx')
     return df_segments
     # To get the segment standings:
     #segment = client.get_segment_leaderboard(segment_id=segment_id, gender='M') # Gender 'M'???
