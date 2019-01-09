@@ -61,7 +61,6 @@ def hr_vs_speed(df):
     plt.plot(speed,hr,'r*')
     plt.show()
 
-
 def hothours(df, figures=False):
     hours =[]
     for id, item in enumerate(df["start_date"]):
@@ -79,6 +78,7 @@ def hothours(df, figures=False):
         plt.bar(counts, bins=range)
         plt.xticks(range)
         plt.show()
+    return {'ratio' : '{:.2f}/{:.2f}/{:.2f}'.format(morning,noon,evening), 'hothours' : range[top]}
 
 def trindex(df):
     # Calculate tri H-index, a.k.a. H-Trindex
@@ -89,6 +89,7 @@ def trindex(df):
     df['start_date'] = df.index
     h_sport = h_index(df, figures=False)
     print('H-Trindex: %i' % (h_sport))
+    return h_sport
 
 def avg_speed(df):
     # Calculate

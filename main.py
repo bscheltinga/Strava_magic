@@ -1,6 +1,7 @@
 import tools.DataHandler as dh
 import tools.authorization as auth
 import tools.stat_collector as stat
+import tools.selectdata as selectdata
 import tools.kmlmap as kmlmap
 import os
 import time
@@ -28,8 +29,14 @@ if __name__ == '__main__':
     # Get latest data
     data.sync()
     df = data.get_data()
+
+    # Select data
+    year_df, year_headers = selectdata.year(df)
+    sport_df, sport_headers = selectdata.sport(df, ['Ride', 'Run'])
+    gear_df, gear_headers = selectdata.gear(df)
     # Collect statistics from selected data
-    stat.collect(df)
+    stat_df = stat.collect(gear_df, gear_headers)
+    stat.output(stat_df, 'gear.xlsx')
 
     #Create KML map for heatmap
     # kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
