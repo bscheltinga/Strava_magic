@@ -14,9 +14,9 @@ import json
 
 if __name__ == '__main__':
     # Check if user_access token is available, otherwise do authorisation first.
-    if not os.path.isfile(r'tokens\user_access.token'):
+    if not os.path.isfile(os.path.join('tokens','user_access.token')):
        auth.authorize()
-    with open(r'tokens\user_access.token', 'r') as file:
+    with open(os.path.join('tokens','user_access.token'), 'r') as file:
         user_token = json.load(file)
     # Check if token is still valid, otherwise refresh token
     if time.time() > user_token['expires_at']:
@@ -32,9 +32,13 @@ if __name__ == '__main__':
 
     # Select data
     year_df, year_headers = selectdata.year(df)
-    sport_df, sport_headers = selectdata.sport(df, ['Ride', 'Run'])
+    sport_df, sport_headers = selectdata.sport(df)
     gear_df, gear_headers = selectdata.gear(df)
     # Collect statistics from selected data
+    stat_df = stat.collect(year_df, year_headers)
+    stat.output(stat_df, 'year.xlsx')
+    stat_df = stat.collect(sport_df, sport_headers)
+    stat.output(stat_df, 'sport.xlsx')
     stat_df = stat.collect(gear_df, gear_headers)
     stat.output(stat_df, 'gear.xlsx')
 

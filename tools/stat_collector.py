@@ -1,5 +1,6 @@
 import tools.statistics as stats
 import pandas as pd
+import os
 
 def collect(df_list, headers):
     total = pd.DataFrame()
@@ -40,5 +41,5 @@ def collect(df_list, headers):
     return total
 
 def output(parsed_df, output_name):
-    parsed_df.to_excel(r'data\\'+output_name)
-    print("Save to 'data\\'"+str(output_name))
+    parsed_df.to_excel(os.path.join('data',output_name))
+    print("Saved to "+os.path.join('data',output_name))
