@@ -4,68 +4,10 @@ import tools.authorization as auth
 import tools.kmlmap as kmlmap
 import os
 import time
-import pandas as pd
 import json
-import numpy as np
-import matplotlib.pyplot as plt
-from datetime import timezone
 
-def hothours(df, figures=False):
-    hours =[]
-    df["start_date"] = df["start_date"].astype("datetime64")
-    for id, item in enumerate(df["start_date"]):
-        local_time = item.replace(tzinfo=timezone.utc).astimezone(tz='Europe/Amsterdam')
-        hours.append(local_time.hour)
-    counts, range = np.histogram(hours, bins=np.max(hours)-np.min(hours))
-    sort = np.argsort(counts)[::-1]
-    morning = counts[range[:-1] < 12].sum() / counts.sum()
-    noon = counts[(range[:-1] >= 12) & (range[:-1] < 18)].sum() /counts.sum()
-    evening = counts[range[:-1] >= 18].sum() /counts.sum()
-    print('Ratio morning/noon/evening: {:.2f}/{:.2f}/{:.2f}'.format(morning,noon,evening))
-    top = sort[0:3]
-    print('Hot hours: {}'.format(range[top]))
-    if figures:
-        plt.bar(counts, bins=range)
-        plt.xticks(range)
-        plt.show()
 
-def totals(df):
-    # Calculate totals for sports
-    for sport in ['Ride', 'Run', 'Swim']:
-        df_sport = df.loc[(df['type'] == sport) & (df['private'] == False)]
-        totals = anal.totals(df_sport)
-        time = str(totals['elapsed_time'])
-        print(
-            '{} totals: distance={:.2f}, kudos={}, avg_kudos={:.2f}, elapsed time={}'.format(sport, totals['distance'],
-                                                                                             totals['kudos'],
-                                                                                             totals['avg_kudos'], time))
-def hindex(df):
-    # Calculate H-index per day for sports
-    for sport in ['Ride', 'Run', 'Swim']:
-        df_day = df.loc[(df['type'] == sport)]
-        df_day.index = pd.to_datetime(df_day['start_date'])
-        df_day = df_day.resample('D').sum()
-        df_day = df_day.drop(df_day.loc[df_day['distance'] == 0].index)
-        h_sport = anal.h_index(df_day, figures=False)
-        print('%s day h-index: %i' % (sport, h_sport))
 
-    # Calculate tri H-index, a.k.a. H-Trindex
-    df_sport = df.loc[(df['type'] == 'Ride') & (df['type'] == 'Run') & (df['type'] == 'Swim')]
-    df.index = pd.to_datetime(df['start_date'])
-    df = df.resample('D').sum()
-    df = df.drop(df.loc[df['distance'] == 0].index)
-    h_sport = anal.h_index(df, figures=False)
-    print('H-Trindex: %i' % (h_sport))
-
-def speed_per_gear(df):
-    # Calculate
-    df['moving_time'] = pd.to_timedelta(df['moving_time'])
-    df['moving_time'] = df['moving_time'] / np.timedelta64(1, 's')
-    gear = df.gear_name.unique()
-    for name in gear:
-        rowdata = df.loc[(df['gear_name'] == name)].mean()
-        speed = (rowdata['distance']/rowdata['moving_time'])*3.6
-        print('{}: {:.2f} km/h'.format(name, speed))
 
 ############MAIN###############
 
@@ -88,16 +30,25 @@ if __name__ == '__main__':
     df = data.get_data()
     # Show totals per sport
     print('=====Totals=====')
-    totals(df)
+    totals = anal.totals(df)
+    time = str(totals['elapsed_time'])
+    print('totals: distance={:.2f}, kudos={}, avg_kudos={:.2f}, elapsed time={}'.format(totals['distance'],
+                                                                                         totals['kudos'],
+                                                                                         totals['avg_kudos'], time))
     # Show h-index of dataset
     print('=====H-Index=====')
-    hindex(df)
-    # Calculate average speed per gear
-    print('=====Average speed per gear=====')
-    speed_per_gear(df)
+    h = anal.h_index(df)
+    print("H-index overall: %i" % h)
+    anal.trindex(df)
+    # Calculate average speed
+    print('=====Average speed=====')
+    avg_speed_bike = anal.avg_speed(df.loc[df['type'] == 'Ride'])
+    avg_speed_run = anal.avg_speed(df.loc[df['type'] == 'Run'])
+    print("Average speed bike: %.2f km/h" % avg_speed_bike)
+    print("Average speed run: %.2f km/h" % avg_speed_run)
     # Hot hours
     print('=====Hot hours=====')
-    hothours(df)
+    anal.hothours(df)
 
     #Create KML map for heatmap
     # kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
