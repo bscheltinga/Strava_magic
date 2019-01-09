@@ -27,6 +27,7 @@ def hindex(df):
         print('%s day h-index: %i' % (sport, h_sport))
 
     # Calculate tri H-index, a.k.a. H-Trindex
+    df_sport = df.loc[(df['type'] == 'Ride') & (df['type'] == 'Run') & (df['type'] == 'Swim')]
     df.index = pd.to_datetime(df['start_date'])
     df = df.resample('D').sum()
     df = df.drop(df.loc[df['distance'] == 0].index)
