@@ -40,7 +40,7 @@ class DataHandler(object):
                    'type' : str(activity.type),
                    'start_date' : activity.start_date.strftime('%Y-%m-%d %H:%M:%S'),
                    'athlete_count' : int(activity.athlete_count),
-                   'gear_name': self.__api.get_gear(activity.gear_id).name if not str(activity.gear_id)=='None' else 'None',
+                   'gear_name': str(activity.gear_id),
                    'private' : str(activity.private)
                    }
         return datarow
@@ -51,6 +51,19 @@ class DataHandler(object):
         df['moving_time'] = pd.to_timedelta(df['moving_time'])
         df['elapsed_time'] = pd.to_timedelta(df['elapsed_time'])
         return df
+
+    def __replacegearid(self, df):
+        gear_ids = df['gear_name'].unique()
+        for id in gear_ids:
+            if not id == "None":
+                gear_name = self.__api.get_gear(id)
+                row_idx = df['gear_name'] == id
+                df.loc[row_idx, 'gear_name'] =  gear_name.name
+            else:
+                row_idx = df['gear_name'] == id
+                df.loc[row_idx, 'gear_name'] = "None"
+        return df
+
     def sync(self, force=False):
         if os.path.isfile(self.__activitiesfile) and not force:
             self.__update()
@@ -67,6 +80,7 @@ class DataHandler(object):
             entry = self.__handleActivity(activity)
             df = df.append(entry, ignore_index=True)
         print('resulted in datafile with %i new activities' %(i+1))
+        df = self.__replacegearid(df)
         df.to_excel(self.__activitiesfile)
 
     def full_sync(self):
@@ -82,6 +96,7 @@ class DataHandler(object):
         #flip list so lastest is on the bottom
         df = df.iloc[::-1]
         print('resulted in datafile with %i activities' % (i + 1))
+        df = self.__replacegearid(df)
         df.to_excel(self.__activitiesfile)
 
     def get_data(self):
