@@ -40,7 +40,7 @@ class DataHandler(object):
                    'type' : str(activity.type),
                    'start_date' : activity.start_date.strftime('%Y-%m-%d %H:%M:%S'),
                    'athlete_count' : int(activity.athlete_count),
-                   'gear_id': str(activity.gear_id),
+                   'gear_name': self.__api.get_gear(activity.gear_id).name if not str(activity.gear_id)=='None' else 'None',
                    'private' : str(activity.private)
                    }
         return datarow

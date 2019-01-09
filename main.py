@@ -6,8 +6,9 @@ import os
 import time
 import pandas as pd
 import json
+import numpy as np
 
-def hindex(df):
+def totals(df):
     # Calculate totals for sports
     for sport in ['Ride', 'Run', 'Swim']:
         df_sport = df.loc[(df['type'] == sport) & (df['private'] == False)]
@@ -17,6 +18,8 @@ def hindex(df):
             '{} totals: distance={:.2f}, kudos={}, avg_kudos={:.2f}, elapsed time={}'.format(sport, totals['distance'],
                                                                                              totals['kudos'],
                                                                                              totals['avg_kudos'], time))
+
+def hindex(df):
     # Calculate H-index per day for sports
     for sport in ['Ride', 'Run', 'Swim']:
         df_day = df.loc[(df['type'] == sport)]
@@ -33,6 +36,17 @@ def hindex(df):
     df = df.drop(df.loc[df['distance'] == 0].index)
     h_sport = anal.h_index(df, figures=False)
     print('H-Trindex: %i' % (h_sport))
+
+def speed_per_gear(df):
+    # Calculate
+    df['moving_time'] = pd.to_timedelta(df['moving_time'])
+    df['moving_time'] = df['moving_time'] / np.timedelta64(1, 's')
+    gear = df.gear_name.unique()
+    for name in gear:
+        rowdata = df.loc[(df['gear_name'] == name)].mean()
+        speed = (rowdata['distance']/rowdata['moving_time'])*3.6
+        print('{}: {:.2f} km/h'.format(name, speed))
+
 
 ############MAIN###############
 
@@ -53,8 +67,15 @@ if __name__ == '__main__':
     # Get latest data
     data.sync()
     df = data.get_data()
+    # Show totals per sport
+    print('=====Totals=====')
+    totals(df)
     # Show h-index of dataset
+    print('=====H-Index=====')
     hindex(df)
+    # Calculate average speed per gear
+    print('=====Average speed per gear=====')
+    speed_per_gear(df)
 
     #Create KML map for heatmap
     # kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
