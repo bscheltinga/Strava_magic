@@ -64,6 +64,10 @@ class DataHandler(object):
                 df.loc[row_idx, 'gear_name'] = "None"
         return df
 
+    def __savefile(self,df):
+        df = self.__replacegearid(df)
+        df.to_json(self.__activitiesfile)
+
     def sync(self, force=False):
         if os.path.isfile(self.__activitiesfile) and not force:
             self.__update()
@@ -80,8 +84,8 @@ class DataHandler(object):
             entry = self.__handleActivity(activity)
             df = df.append(entry, ignore_index=True)
         print('resulted in datafile with %i new activities' %(i+1))
-        df = self.__replacegearid(df)
-        df.to_excel(self.__activitiesfile)
+        if i+1 >0:
+            self.__savefile(df)
 
     def full_sync(self):
         print('**FULL SYNC**')
@@ -96,8 +100,7 @@ class DataHandler(object):
         #flip list so lastest is on the bottom
         df = df.iloc[::-1]
         print('resulted in datafile with %i activities' % (i + 1))
-        df = self.__replacegearid(df)
-        df.to_excel(self.__activitiesfile)
+        self.__savefile(df)
 
     def get_data(self):
         df = pd.read_excel(self.__activitiesfile)
