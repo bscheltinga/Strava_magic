@@ -25,7 +25,6 @@ def hothours(df, figures=False):
         plt.xticks(range)
         plt.show()
 
-
 def totals(df):
     # Calculate totals for sports
     for sport in ['Ride', 'Run', 'Swim']:
@@ -36,7 +35,6 @@ def totals(df):
             '{} totals: distance={:.2f}, kudos={}, avg_kudos={:.2f}, elapsed time={}'.format(sport, totals['distance'],
                                                                                              totals['kudos'],
                                                                                              totals['avg_kudos'], time))
-
 def hindex(df):
     # Calculate H-index per day for sports
     for sport in ['Ride', 'Run', 'Swim']:
@@ -64,7 +62,6 @@ def speed_per_gear(df):
         rowdata = df.loc[(df['gear_name'] == name)].mean()
         speed = (rowdata['distance']/rowdata['moving_time'])*3.6
         print('{}: {:.2f} km/h'.format(name, speed))
-
 
 ############MAIN###############
 
