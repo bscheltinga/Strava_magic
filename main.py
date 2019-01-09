@@ -7,6 +7,24 @@ import time
 import pandas as pd
 import json
 import numpy as np
+import matplotlib.pyplot as plt
+from datetime import timezone
+
+def hothours(df, figures=False):
+    hours =[]
+    df["start_date"] = df["start_date"].astype("datetime64")
+    for id, item in enumerate(df["start_date"]):
+        local_time = item.replace(tzinfo=timezone.utc).astimezone(tz='Europe/Amsterdam')
+        hours.append(local_time.hour)
+    counts, range = np.histogram(hours, bins=np.max(hours)-np.min(hours))
+    sort = np.argsort(counts)[::-1]
+    top = sort[0:3]
+    print('Hot hours: {}'.format(range[top]))
+    if figures:
+        plt.bar(counts, bins=range)
+        plt.xticks(range)
+        plt.show()
+
 
 def totals(df):
     # Calculate totals for sports
@@ -76,6 +94,9 @@ if __name__ == '__main__':
     # Calculate average speed per gear
     print('=====Average speed per gear=====')
     speed_per_gear(df)
+    # Hot hours
+    print('=====Hot hours=====')
+    hothours(df)
 
     #Create KML map for heatmap
     # kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
