@@ -18,6 +18,10 @@ def hothours(df, figures=False):
         hours.append(local_time.hour)
     counts, range = np.histogram(hours, bins=np.max(hours)-np.min(hours))
     sort = np.argsort(counts)[::-1]
+    morning = counts[range[:-1] < 12].sum() / counts.sum()
+    noon = counts[(range[:-1] >= 12) & (range[:-1] < 18)].sum() /counts.sum()
+    evening = counts[range[:-1] >= 18].sum() /counts.sum()
+    print('Ratio morning/noon/evening: {:.2f}/{:.2f}/{:.2f}'.format(morning,noon,evening))
     top = sort[0:3]
     print('Hot hours: {}'.format(range[top]))
     if figures:
