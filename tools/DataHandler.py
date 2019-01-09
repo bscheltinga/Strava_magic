@@ -45,16 +45,22 @@ class DataHandler(object):
                    }
         return datarow
 
+    def __setdatatypes(self, df):
+        # alternative in case of errors df["start_date"] = df["start_date"].astype("datetime64")
+        df['start_date'] = pd.to_datetime(df['start_date'])
+        df['moving_time'] = pd.to_timedelta(df['moving_time'])
+        df['elapsed_time'] = pd.to_timedelta(df['elapsed_time'])
+        return df
     def sync(self, force=False):
         if os.path.isfile(self.__activitiesfile) and not force:
-            df = self.get_data()
-            self.__update(df)
+            self.__update()
         else:
             self.full_sync()
 
-    def __update(self, df):
+    def __update(self):
         print('**UPDATING**')
         i = -1
+        df = pd.read_excel(self.__activitiesfile)
         latest = pd.to_datetime(df['start_date']).max()
         activities = self.__api.get_activities(after=latest)
         for i, activity in enumerate(activities):
@@ -80,4 +86,4 @@ class DataHandler(object):
 
     def get_data(self):
         df = pd.read_excel(self.__activitiesfile)
-        return(df)
+        return self.__setdatatypes(df)
