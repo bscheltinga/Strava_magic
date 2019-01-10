@@ -1,6 +1,7 @@
 from stravalib import Client
 import pandas as pd
 import os.path
+from sqlalchemy import create_engine
 
 class DataHandler(object):
     def __init__(self, token, datafolder='data'):
@@ -66,7 +67,7 @@ class DataHandler(object):
 
     def __savefile(self,df):
         df = self.__replacegearid(df)
-        df.to_json(self.__activitiesfile)
+        df.to_excel(self.__activitiesfile)
 
     def sync(self, force=False):
         if os.path.isfile(self.__activitiesfile) and not force:
@@ -105,3 +106,8 @@ class DataHandler(object):
     def get_data(self):
         df = pd.read_excel(self.__activitiesfile)
         return self.__setdatatypes(df)
+
+    def setup_sql(self,df):
+        engine = create_engine(os.path.join('sqlite:///', 'data', 'strava.db'))
+        df.to_sql('activities',con=engine)
+        return engine

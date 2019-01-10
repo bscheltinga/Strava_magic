@@ -29,6 +29,7 @@ if __name__ == '__main__':
     # Get latest data
     data.sync()
     df = data.get_data()
+    sql = data.setup_sql(df)
 
     # Select data
     year_df, year_headers = selectdata.year(df)
