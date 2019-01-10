@@ -8,6 +8,7 @@ class DataHandler(object):
         self.__token = token
         self.__datafolder = datafolder
         self.__activitiesfile = os.path.join(self.__datafolder,'activities.xlsx')
+        self.__databaseadress = os.path.join('sqlite:///', self.__datafolder, 'strava.db')
 
         #Setup folders
         self.__setupfolders()
@@ -48,6 +49,7 @@ class DataHandler(object):
 
     def __setdatatypes(self, df):
         # alternative in case of errors df["start_date"] = df["start_date"].astype("datetime64")
+        # alternative in case of errors df['moving_time'] = df["start_date"].astype('timedelta64[s]')
         df['start_date'] = pd.to_datetime(df['start_date'])
         df['moving_time'] = pd.to_timedelta(df['moving_time'])
         df['elapsed_time'] = pd.to_timedelta(df['elapsed_time'])
@@ -108,6 +110,6 @@ class DataHandler(object):
         return self.__setdatatypes(df)
 
     def setup_sql(self,df):
-        engine = create_engine(os.path.join('sqlite:///', 'data', 'strava.db'))
-        df.to_sql('activities',con=engine)
+        engine = create_engine(self.__databaseadress)
+        df.to_sql('activities',con=engine, if_exists='replace')
         return engine
