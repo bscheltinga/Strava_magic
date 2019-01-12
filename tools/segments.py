@@ -30,5 +30,13 @@ def segmentlist(user_token, df):
 # Later, make one function which combines segmentlist and segmentrating
 def segmentrating(user_token, df_segments):
     client = Client(access_token=user_token)
-    for idx in range(20) # len(df_segments) but for no, only first 20 segments
-        client. # get segments by number
+    for idx in range(20): # len(df_segments) but for no, only first 20 segments
+        segment_id = df_segments['id'][idx]
+        segment = client.get_segment_leaderboard(segment_id, gender=None)
+
+        if len(segment.entries) == 15:
+        entry = {'type': str(segment.kom_type),
+                 'effort_count': int(segment.effort_count),
+                 'rank': int(segment.entries[12].rank)} # Check if always at 12
+
+        #df_segments.to_excel(r'data\Segments.xlsx')
