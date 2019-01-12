@@ -33,7 +33,10 @@ for sport in ['Ride', 'Run', 'Swim']:
     time = str(totals['elapsed_time'])
     print('{} totals: distance={:.2f}, kudos={}, avg_kudos={:.2f}, elapsed time={}'.format(sport, totals['distance'], totals['kudos'], totals['avg_kudos'], time))
 
-seg.segmentlist(access_token, df.loc[df['manual'] == 0])
+# df_segments = seg.segmentlist(access_token, df.loc[df['manual'] == 0]) # Takes a lot of time
+import pandas as pd
+df_segments = pd.read_excel(r'data\Segments.xlsx')
+df_segments = seg.segmentrating(access_token, df_segments) # Takes again a lot of time
 #Create KML map for heatmap
 # kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
 
