@@ -38,7 +38,7 @@ def segmentlist(user_token, df):
                             j].start_date_local
                         break
 
-            df_segments = df_segments.append(entry, ignore_index=True)
+                df_segments = df_segments.append(entry, ignore_index=True)
         idx += 1
         if idx == 20:  # Only first 20 activities
             break
