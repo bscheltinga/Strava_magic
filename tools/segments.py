@@ -18,7 +18,8 @@ def segmentlist(user_token, df):
             segment_id = last_act.segment_efforts[i].segment.id
             if (last_act.segment_efforts[i].segment.hazardous == 0 and
                     sum(df_segments['id'].isin([segment_id])) == 0):  # Only for unique segments
-                print('Activities: %i / %i | Segments: %i / %i' % (idx, len(df), i, len(last_act.segment_efforts)))
+                print('Activities: %i / %i | Segments: %i / %i | Limits: %i' %
+                      (idx, len(df), i, len(last_act.segment_efforts),limit_count))
                 entry = {'id': int(last_act.segment_efforts[i].segment.id),
                          'name': last_act.segment_efforts[i].name,
                          'distance': float(last_act.segment_efforts[i].distance.num),
