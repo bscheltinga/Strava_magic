@@ -41,18 +41,18 @@ def segmentlist(user_token, df):
                 df_segments = df_segments.append(entry, ignore_index=True)
                 limit_count = len(df_segments) + idx  # Found that 1 for each unique seg and 1 for each act.
 
-                if limit_count > (500*i_lim):  # To prevent exceeding strava limits
+                if limit_count > (580*i_lim):  # To prevent exceeding strava limits
                     LimitFlag = 1
                     i_lim += 1
                     print('Waiting for STRAVA API limits.')
                     while LimitFlag == 1:
-                        time.sleep(30) # Wait 30 seconds
+                        time.sleep(20) # Wait 30 seconds
                         checktime = time.localtime()
                         if checktime.tm_min % 15 == 0:
                             LimitFlag = 0
 
         idx += 1
-        if idx == 1500:  # Only first 1000 activities
+        if idx == 1500:  # Only first 1500 activities
             break
 
     df_segments = df_segments.sort_values(by=['rank'])
