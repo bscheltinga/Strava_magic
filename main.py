@@ -31,6 +31,9 @@ if __name__ == '__main__':
     df = data.get_data()
     sql = data.setup_sql(df)
 
+    test = sql.execute("SELECT type, strftime('%Y', start_date) as year,  avg(distance)/1000 as km_avg FROM activities GROUP BY type, year ORDER BY km_avg DESC ").fetchall()
+    [print(item[0], 'average distance %.2f km ' % item[1]) for item in test]
+
     # Select data
     year_df, year_headers = selectdata.year(df)
     sport_df, sport_headers = selectdata.sport(df)
