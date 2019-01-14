@@ -8,10 +8,8 @@ def segmentlist(user_token, df):
     df_segments = pd.DataFrame()
     df_segments['id'] = np.nan # make the id column
     idx = 0
+    limit_count = 0
     for a, row in df.iterrows():
-        if idx % 550 == 0 and idx > 1:  # To prevent exceeding strava limits
-            print('Waiting for STRAVA API limits.') # THIS VALUE IS INCORRECT
-            time.sleep(900)
         id = float(row['id']) # Make float to compare with the DF
         last_act = client.get_activity(activity_id=id, include_all_efforts=True) # Get activity
 
@@ -38,9 +36,14 @@ def segmentlist(user_token, df):
                             j].start_date_local
                         break
 
+                if limit_count % 580 == 0 and idx > 1:  # To prevent exceeding strava limits
+                    print('Waiting for STRAVA API limits.')
+                    time.sleep(900)
+
                 df_segments = df_segments.append(entry, ignore_index=True)
+                limit_count = len(df_segments) + idx  # Found that 1 for each unique seg and 1 for each act.
         idx += 1
-        if idx == 20:  # Only first 20 activities
+        if idx == 10:  # Only first 20 activities
             break
 
     df_segments = df_segments.sort_values(by=['rank'])
@@ -49,3 +52,5 @@ def segmentlist(user_token, df):
     df_segments['GosC-score'] = -np.log10(df_segments['rank'] / df_segments['efforts']) # Add something to see %diff with #1
     df_segments.to_excel(r'data\Segments.xlsx')
     return df_segments
+
+# TO ADD: strava limits pause, total GOS-C-INDEX, avg speed.
