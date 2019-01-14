@@ -7,7 +7,7 @@ def segmentlist(user_token, df):
     client = Client(access_token=user_token)
     df_segments = pd.DataFrame()
     df_segments['id'] = np.nan # make the id column
-    idx = 0
+    idx = 19
     i_lim = 1 # For the limit counter
     limit_count = 0
     for a, row in df.iterrows():
@@ -52,14 +52,18 @@ def segmentlist(user_token, df):
                             LimitFlag = 0
 
         idx += 1
-        if idx == 1500:  # Only first 1500 activities
+        if idx == 22:  # Only first 1500 activities
             break
 
-    df_segments = df_segments.sort_values(by=['rank'])
-    df_segments['Perc_rat'] = (df_segments['rank'] / df_segments['efforts'])*100
+    df_segments['Perc_rank'] = (df_segments['rank'] / df_segments['efforts'])*100
     df_segments['distance'] = df_segments['distance']/1000
-    df_segments['GosC-score'] = -np.log10(df_segments['rank'] / df_segments['efforts']) # Add something to see %diff with #1
-    df_segments.to_excel(r'data\Segments.xlsx')
+    df_segments['GosCore'] = -np.log10(df_segments['rank'] / df_segments['efforts'])
+    df_segments['GosCore_max'] = -np.log10(1 / df_segments['efforts'])
+    #df_segments['seconds'] = pd.to_timedelta(df_segments['elapsed_time'])
+    #df_segments['seconds'] = pd.Series.dt.total_seconds(df_segments['seconds'])
+    #df_segments['Avg_speed'] = # km/h
+    #df_segments['Avg_pace'] = # min/km
+    df_segments.to_excel(r'data\Segmentsv2.xlsx')
     return df_segments
 
-# TO ADD: strava limits pause, total GOS-C-INDEX, avg speed.
+# TO ADD: avg speed, avg pace, goscore
