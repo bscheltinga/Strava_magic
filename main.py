@@ -57,22 +57,10 @@ if __name__ == '__main__':
     # Show h-index of dataset
     hindex(df)
 
-    #Create KML map for heatmap
-    # kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
-
-# df_segments = seg.segmentlist(access_token, df.loc[df['manual'] == 0]) # Takes a lot of time
-import pandas as pd
-df_segments = pd.read_excel(r'data\Segments.xlsx')
-df_segments = seg.segmentrating(access_token, df_segments) # Takes again a lot of time
+anal.word_usage(df)
+df_segments = seg.segmentlist(access_token, df) # Takes again a lot of time
 
 #Create KML map for heatmap
 # kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
 
-# df_segments = seg.segmentlist(access_token, df.loc[df['manual'] == 0]) # Takes a lot of time
-import pandas as pd
-df_segments = pd.read_excel(r'data\Segments.xlsx')
-df_segments = seg.segmentrating(access_token, df_segments) # Takes again a lot of time
-
-#Create KML map for heatmap
-# kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
 
