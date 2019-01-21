@@ -64,6 +64,6 @@ def word_usage(df):
     words = []
     for i in range(len(df)):
         words = words + df['name'][i].split()
-    top_words = collections.Counter(map(str.lower, words)).most_common(100)
+    top_words = collections.Counter(map(str.lower, words)).most_common(20)
     print(top_words)
     return top_words
