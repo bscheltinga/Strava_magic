@@ -1,6 +1,7 @@
 import tools.DataHandler as dh
 import tools.analytics as anal
 import tools.authorization as auth
+import tools.segments as seg
 import tools.kmlmap as kmlmap
 import os
 import time
@@ -59,4 +60,19 @@ if __name__ == '__main__':
     #Create KML map for heatmap
     # kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
 
+# df_segments = seg.segmentlist(access_token, df.loc[df['manual'] == 0]) # Takes a lot of time
+import pandas as pd
+df_segments = pd.read_excel(r'data\Segments.xlsx')
+df_segments = seg.segmentrating(access_token, df_segments) # Takes again a lot of time
+
+#Create KML map for heatmap
+# kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
+
+# df_segments = seg.segmentlist(access_token, df.loc[df['manual'] == 0]) # Takes a lot of time
+import pandas as pd
+df_segments = pd.read_excel(r'data\Segments.xlsx')
+df_segments = seg.segmentrating(access_token, df_segments) # Takes again a lot of time
+
+#Create KML map for heatmap
+# kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
 

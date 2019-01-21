@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import collections
 
 def h_index(df, figures=False):
     # Calculate index
@@ -54,5 +55,15 @@ def hr_vs_speed(df):
     speed = np.array(df['average_speed'].tolist())*3.6
     hr = df['average_heartrate'].tolist()
     plt.plot(speed,hr,'r*')
+    plt.title('Heart rate vs Speed plot')
+    plt.xlabel('Speed [km/h]')
+    plt.ylabel('Heart rate [bpm]')
     plt.show()
 
+def word_usage(df):
+    words = []
+    for i in range(len(df)):
+        words = words + df['name'][i].split()
+    top_words = collections.Counter(map(str.lower, words)).most_common(100)
+    print(top_words)
+    return top_words
