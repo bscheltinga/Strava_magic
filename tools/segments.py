@@ -29,8 +29,6 @@ def segmentlist(user_token, df):
                          'KOM_time': last_act.segment_efforts[i].segment.leaderboard.entries[1].elapsed_time
                          }
 
-                if entry['id'] == 15991054:
-                    testdebug = 10
 
                 for j in reversed(range(len(last_act.segment_efforts[i].segment.leaderboard.entries))):
                     if str(last_act.segment_efforts[i].segment.leaderboard.entries[j].athlete_name) == 'Bouke S.':
