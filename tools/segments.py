@@ -77,6 +77,7 @@ def segmentlist(user_token, df):
             'GosCore: %.2f out of %.2f' % (round(GosCore.values[index] / (index+1), 2)
                                            , round(GosCore_max.values[index] / (index+1), 2)))
     df_segments.to_excel(r'data\Segmentsv2.xlsx')
+    df_segments.to_excel(r'data\Segments.xlsx')
 
 
     return df_segments
