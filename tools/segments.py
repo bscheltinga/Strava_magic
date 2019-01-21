@@ -41,6 +41,7 @@ def segmentlist(user_token, df):
 
                 df_segments = df_segments.append(entry, ignore_index=True)
                 limit_count = len(df_segments) + idx  # Found that 1 for each unique seg and 1 for each act.
+                entry = []
 
                 if limit_count > (580*i_lim):  # To prevent exceeding strava limits
                     LimitFlag = 1
@@ -66,6 +67,7 @@ def segmentlist(user_token, df):
     #df_segments['Avg_pace'] = # min/km
 
     #Calculate GosCore
+    df_segments.to_excel(r'data\Segments.xlsx')
     df_segments = df_segments.sort_values(by=['GosCore'],ascending=False)
     GosCore = df_segments['GosCore'].cumsum()
     GosCore_max = df_segments['GosCore_max'].cumsum()
