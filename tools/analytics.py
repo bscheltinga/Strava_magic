@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import collections
+from string import punctuation
 
 def h_index(df, figures=False):
     # Calculate index
@@ -63,7 +64,14 @@ def hr_vs_speed(df):
 def word_usage(df):
     words = []
     for i in range(len(df)):
-        words = words + df['name'][i].split()
+        last_act = df['name'][i].split()
+
+        words = words + last_act
     top_words = collections.Counter(map(str.lower, words)).most_common(20)
     print(top_words)
     return top_words
+
+def StevenKruijswijkcoeff(df): # Calculates the Steven Kruijswijk Coefficient. (ratio between move/elapsed time)
+    for i in range(len(df)):
+        df['SKC'][i] = (df.pd.to_timedelta(df.moving_time[i]) / df.df.pd.to_timedelta(df.elapsed_time[i]))*100
+    return(words)
