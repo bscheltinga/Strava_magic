@@ -68,7 +68,6 @@ class DataHandler(object):
         return df
 
     def __savefile(self,df):
-        df = self.__replacegearid(df)
         df.to_excel(self.__activitiesfile)
 
     def sync(self, force=False):
@@ -81,13 +80,16 @@ class DataHandler(object):
         print('**UPDATING**')
         i = -1
         df = pd.read_excel(self.__activitiesfile)
+        df_new = pd.DataFrame()
         latest = pd.to_datetime(df['start_date']).max()
         activities = self.__api.get_activities(after=latest)
         for i, activity in enumerate(activities):
             entry = self.__handleActivity(activity)
-            df = df.append(entry, ignore_index=True)
+            df_new = df_new.append(entry, ignore_index=True)
         print('resulted in datafile with %i new activities' %(i+1))
         if i+1 >0:
+            df_new = self.__replacegearid(df_new)
+            df = pd.concat([df,df_new])
             self.__savefile(df)
 
     def full_sync(self):
