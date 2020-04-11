@@ -7,11 +7,6 @@ import os
 import time
 import json
 
-
-
-
-############MAIN###############
-
 if __name__ == '__main__':
     # Check if user_access token is available, otherwise do authorisation first.
     if not os.path.isfile(os.path.join('tokens','user_access.token')):
@@ -29,12 +24,12 @@ if __name__ == '__main__':
     # Get latest data
     data.sync()
     df = data.get_data()
-    sql = data.setup_sql(df)
+    # sql = data.setup_sql(df)
+    #
+    # test = sql.execute("SELECT type, strftime('%Y', start_date) as year,  avg(distance)/1000 as km_avg FROM activities GROUP BY type, year ORDER BY km_avg DESC ").fetchall()
+    # [print(item[0], 'average distance %.2f km ' % item[1]) for item in test]
 
-    test = sql.execute("SELECT type, strftime('%Y', start_date) as year,  avg(distance)/1000 as km_avg FROM activities GROUP BY type, year ORDER BY km_avg DESC ").fetchall()
-    [print(item[0], 'average distance %.2f km ' % item[1]) for item in test]
-
-    # Select data
+    Select data
     year_df, year_headers = selectdata.year(df)
     sport_df, sport_headers = selectdata.sport(df)
     gear_df, gear_headers = selectdata.gear(df)
@@ -47,6 +42,6 @@ if __name__ == '__main__':
     stat.output(stat_df, 'gear.xlsx')
 
     #Create KML map for heatmap
-    # kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
+    kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
 
 
