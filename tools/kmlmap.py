@@ -1,8 +1,11 @@
-from stravalib import Client
+import time
+
 import numpy as np
 import simplekml
-import time
+from stravalib import Client
 from tqdm import tqdm
+
+
 def create_kml(usertoken, df):
     client = Client(access_token=usertoken)
     # Initiate KML
@@ -10,7 +13,7 @@ def create_kml(usertoken, df):
     limit_count = 0
     i_lim = 1
     # Get gps data from every activity
-    for a, row in tqdm(df.iterrows(), total=df.shape[0],desc='Creating KML file' ):
+    for a, row in tqdm(df.iterrows(), total=df.shape[0], desc='Creating KML file'):
 
         limit_count += 1
         if limit_count > (580 * i_lim):  # To prevent exceeding strava limits
@@ -26,7 +29,7 @@ def create_kml(usertoken, df):
         id = row['id']
         types = ['latlng']
         streams = client.get_activity_streams(id, types=types, resolution='medium')
-        if [True for x in streams.keys() if x == 'latlng']: # Check if latlng data is available as datastream
+        if [True for x in streams.keys() if x == 'latlng']:  # Check if latlng data is available as datastream
             cords = np.array(streams['latlng'].data)
             cords = np.fliplr(cords)  # Flip the cords for right kml notation
             kml.newlinestring(name=row['name'], coords=cords, extrude=1)

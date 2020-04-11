@@ -1,18 +1,20 @@
-from stravalib import Client
-import pandas as pd
 import os.path
+
+import pandas as pd
 from sqlalchemy import create_engine
+from stravalib import Client
+
 
 class DataHandler(object):
     def __init__(self, token, datafolder='data'):
         self.__token = token
         self.__datafolder = datafolder
-        self.__activitiesfile = os.path.join(self.__datafolder,'activities.xlsx')
+        self.__activitiesfile = os.path.join(self.__datafolder, 'activities.xlsx')
         self.__databaseadress = os.path.join('sqlite:///', self.__datafolder, 'strava.db')
 
-        #Setup folders
+        # Setup folders
         self.__setupfolders()
-        #Initialize api client
+        # Initialize api client
         self.__connect(token)
 
     def __connect(self, token):
@@ -23,27 +25,27 @@ class DataHandler(object):
             os.mkdir(self.__datafolder)
 
     def __handleActivity(self, activity):
-        datarow = {'average_heartrate' : activity.average_heartrate,
-                   'max_heartrate' : activity.max_heartrate,
-                   'average_speed' : float(activity.average_speed),
-                   'comment_count' : int(activity.comment_count),
-                   'distance' : float(activity.distance),
-                   'elapsed_time' : str(activity.elapsed_time),
-                   'flagged' : str(activity.flagged),
+        datarow = {'average_heartrate': activity.average_heartrate,
+                   'max_heartrate': activity.max_heartrate,
+                   'average_speed': float(activity.average_speed),
+                   'comment_count': int(activity.comment_count),
+                   'distance': float(activity.distance),
+                   'elapsed_time': str(activity.elapsed_time),
+                   'flagged': str(activity.flagged),
                    'manual': str(activity.manual),
-                   'has_heartrate' : str(activity.has_heartrate),
-                   'id' : int(activity.id),
-                   'kudos_count' : int(activity.kudos_count),
-                   'max_speed' : float(activity.max_speed),
-                   'moving_time' : str(activity.moving_time),
+                   'has_heartrate': str(activity.has_heartrate),
+                   'id': int(activity.id),
+                   'kudos_count': int(activity.kudos_count),
+                   'max_speed': float(activity.max_speed),
+                   'moving_time': str(activity.moving_time),
                    'name': str(activity.name),
-                   'pr_count' : int(activity.pr_count),
-                   'total_photo_count' : int(activity.total_photo_count),
-                   'type' : str(activity.type),
-                   'start_date' : activity.start_date.strftime('%Y-%m-%d %H:%M:%S'),
-                   'athlete_count' : int(activity.athlete_count),
+                   'pr_count': int(activity.pr_count),
+                   'total_photo_count': int(activity.total_photo_count),
+                   'type': str(activity.type),
+                   'start_date': activity.start_date.strftime('%Y-%m-%d %H:%M:%S'),
+                   'athlete_count': int(activity.athlete_count),
                    'gear_name': str(activity.gear_id),
-                   'private' : str(activity.private)
+                   'private': str(activity.private)
                    }
         return datarow
 
@@ -61,13 +63,13 @@ class DataHandler(object):
             if not id == "None":
                 gear_name = self.__api.get_gear(id)
                 row_idx = df['gear_name'] == id
-                df.loc[row_idx, 'gear_name'] =  gear_name.name
+                df.loc[row_idx, 'gear_name'] = gear_name.name
             else:
                 row_idx = df['gear_name'] == id
                 df.loc[row_idx, 'gear_name'] = "None"
         return df
 
-    def __savefile(self,df):
+    def __savefile(self, df):
         df.to_excel(self.__activitiesfile)
 
     def sync(self, force=False):
@@ -86,10 +88,10 @@ class DataHandler(object):
         for i, activity in enumerate(activities):
             entry = self.__handleActivity(activity)
             df_new = df_new.append(entry, ignore_index=True)
-        print('resulted in datafile with %i new activities' %(i+1))
-        if i+1 >0:
+        print('resulted in datafile with %i new activities' % (i + 1))
+        if i + 1 > 0:
             df_new = self.__replacegearid(df_new)
-            df = pd.concat([df,df_new])
+            df = pd.concat([df, df_new])
             self.__savefile(df)
 
     def full_sync(self):
@@ -102,7 +104,7 @@ class DataHandler(object):
             df = df.append(entry, ignore_index=True)
         # reverse index so latest has highest number
         df.index = reversed(range(len(df)))
-        #flip list so lastest is on the bottom
+        # flip list so lastest is on the bottom
         df = df.iloc[::-1]
         print('resulted in datafile with %i activities' % (i + 1))
         df = self.__replacegearid(df)
@@ -112,7 +114,7 @@ class DataHandler(object):
         df = pd.read_excel(self.__activitiesfile)
         return self.__setdatatypes(df)
 
-    def setup_sql(self,df):
+    def setup_sql(self, df):
         engine = create_engine(self.__databaseadress)
-        df.to_sql('activities',con=engine, if_exists='replace')
+        df.to_sql('activities', con=engine, if_exists='replace')
         return engine
