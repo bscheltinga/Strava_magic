@@ -9,6 +9,9 @@ numpy
 time
 matplotlib
 
+Install libraries with:
+pip install -r requirements.txt
+
 Flow:
 1. Download all data and save as alldata(.csv?)
 2. Download data since last time and update alldata(.csv?)

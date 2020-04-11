@@ -1,12 +1,14 @@
 from stravalib import Client
 import pandas as pd
 import os.path
+from sqlalchemy import create_engine
 
 class DataHandler(object):
     def __init__(self, token, datafolder='data'):
         self.__token = token
         self.__datafolder = datafolder
         self.__activitiesfile = os.path.join(self.__datafolder,'activities.xlsx')
+        self.__databaseadress = os.path.join('sqlite:///', self.__datafolder, 'strava.db')
 
         #Setup folders
         self.__setupfolders()
@@ -40,28 +42,55 @@ class DataHandler(object):
                    'type' : str(activity.type),
                    'start_date' : activity.start_date.strftime('%Y-%m-%d %H:%M:%S'),
                    'athlete_count' : int(activity.athlete_count),
-                   'gear_id': str(activity.gear_id),
+                   'gear_name': str(activity.gear_id),
                    'private' : str(activity.private)
                    }
         return datarow
 
+    def __setdatatypes(self, df):
+        # alternative in case of errors df["start_date"] = df["start_date"].astype("datetime64")
+        # alternative in case of errors df['moving_time'] = df["start_date"].astype('timedelta64[s]')
+        df['start_date'] = pd.to_datetime(df['start_date'])
+        df['moving_time'] = pd.to_timedelta(df['moving_time'])
+        df['elapsed_time'] = pd.to_timedelta(df['elapsed_time'])
+        return df
+
+    def __replacegearid(self, df):
+        gear_ids = df['gear_name'].unique()
+        for id in gear_ids:
+            if not id == "None":
+                gear_name = self.__api.get_gear(id)
+                row_idx = df['gear_name'] == id
+                df.loc[row_idx, 'gear_name'] =  gear_name.name
+            else:
+                row_idx = df['gear_name'] == id
+                df.loc[row_idx, 'gear_name'] = "None"
+        return df
+
+    def __savefile(self,df):
+        df.to_excel(self.__activitiesfile)
+
     def sync(self, force=False):
         if os.path.isfile(self.__activitiesfile) and not force:
-            df = self.get_data()
-            self.__update(df)
+            self.__update()
         else:
             self.full_sync()
 
-    def __update(self, df):
+    def __update(self):
         print('**UPDATING**')
         i = -1
+        df = pd.read_excel(self.__activitiesfile)
+        df_new = pd.DataFrame()
         latest = pd.to_datetime(df['start_date']).max()
         activities = self.__api.get_activities(after=latest)
         for i, activity in enumerate(activities):
             entry = self.__handleActivity(activity)
-            df = df.append(entry, ignore_index=True)
+            df_new = df_new.append(entry, ignore_index=True)
         print('resulted in datafile with %i new activities' %(i+1))
-        df.to_excel(self.__activitiesfile)
+        if i+1 >0:
+            df_new = self.__replacegearid(df_new)
+            df = pd.concat([df,df_new])
+            self.__savefile(df)
 
     def full_sync(self):
         print('**FULL SYNC**')
@@ -76,8 +105,14 @@ class DataHandler(object):
         #flip list so lastest is on the bottom
         df = df.iloc[::-1]
         print('resulted in datafile with %i activities' % (i + 1))
-        df.to_excel(self.__activitiesfile)
+        df = self.__replacegearid(df)
+        self.__savefile(df)
 
     def get_data(self):
         df = pd.read_excel(self.__activitiesfile)
-        return(df)
+        return self.__setdatatypes(df)
+
+    def setup_sql(self,df):
+        engine = create_engine(self.__databaseadress)
+        df.to_sql('activities',con=engine, if_exists='replace')
+        return engine

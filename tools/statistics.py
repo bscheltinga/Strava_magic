@@ -1,10 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from datetime import timezone
 import collections
 
 def h_index(df, figures=False):
-    # Calculate index
+    # Sum activities per day
+    df.index = df['start_date']
+    df = df.resample('D').sum()
+    df = df.drop(df.loc[df['distance'] == 0].index)
+
     H_index = 0
     H_index_distance = np.array(df['distance'].tolist())/1000
     # Determine the H-index
@@ -38,9 +43,9 @@ def h_index(df, figures=False):
 
 def totals(df):
     distance = df['distance'].sum()/1000
-    elapsed_time = pd.to_timedelta(df['elapsed_time']).sum()
+    elapsed_time = df['elapsed_time'].sum()
+    moving_time = df['moving_time'].sum()
     kudos = df['kudos_count'].sum()
-    moving_time = pd.to_timedelta(df['moving_time']).sum()
     avg_kudos = df['kudos_count'].mean() # Here devided by the amount of not private activities.
     output = {'distance' : distance,
               'elapsed_time' : elapsed_time,
@@ -60,6 +65,35 @@ def hr_vs_speed(df):
     plt.ylabel('Heart rate [bpm]')
     plt.show()
 
+def hothours(df, figures=False):
+    hours =[]
+    for id, item in enumerate(df["start_date"]):
+        local_time = item.replace(tzinfo=timezone.utc).astimezone(tz='Europe/Amsterdam')
+        hours.append(local_time.hour)
+    counts, range = np.histogram(hours, bins=np.max(hours)-np.min(hours))
+    sort = np.argsort(counts)[::-1]
+    morning = counts[range[:-1] < 12].sum() / counts.sum()
+    noon = counts[(range[:-1] >= 12) & (range[:-1] < 18)].sum() /counts.sum()
+    evening = counts[range[:-1] >= 18].sum() /counts.sum()
+    print('Ratio morning/noon/evening: {:.2f}/{:.2f}/{:.2f}'.format(morning,noon,evening))
+    top = sort[0:3]
+    print('Hot hours: {}'.format(range[top]))
+    if figures:
+        plt.bar(counts, bins=range)
+        plt.xticks(range)
+        plt.show()
+    return {'ratio' : '{:.2f}/{:.2f}/{:.2f}'.format(morning,noon,evening), 'hothours' : range[top]}
+
+def trindex(df):
+    # Calculate tri H-index, a.k.a. H-Trindex
+    df = df.loc[(df['type'] == 'Ride') | (df['type'] == 'Run') | (df['type'] == 'Swim')]
+    df.index = df['start_date']
+    df = df.resample('D').sum()
+    df = df.drop(df.loc[df['distance'] == 0].index)
+    df['start_date'] = df.index
+    h_sport = h_index(df, figures=False)
+    print('H-Trindex: %i' % (h_sport))
+    return h_sport
 def word_usage(df):
     words = []
     for i in range(len(df)):
@@ -67,3 +101,9 @@ def word_usage(df):
     top_words = collections.Counter(map(str.lower, words)).most_common(20)
     print(top_words)
     return top_words
+
+def avg_speed(df):
+    # Calculate
+    mean_time = (df['moving_time'] / np.timedelta64(1, 's')).mean()
+    avg_speed = (df['distance'].mean()/ mean_time)*3.6
+    return avg_speed
