@@ -44,8 +44,13 @@ if __name__ == '__main__':
     # stat.output(stat_df, 'gear.xlsx')
 
 # df_segments = seg.segmentlist(access_token, df) # Takes again a lot of time
+#anal.word_usage(df)
+# df_segments = seg.segmentlist(access_token, df) # Takes again a lot of time
+
+df_skc = df.loc[(df['type'] == 'Ride') & (df['manual'] == False)]
+anal.StevenKruijswijkcoeff(df_skc.tail(250)) # Used only to select last x points.
 
 #Create KML map for heatmap
-# kmlmap.create_kml(access_token, df.loc[df['type'] == 'Ride'])
+#kmlmap.create_kml(access_token, df.loc[df['manual'] == 0])
 
 

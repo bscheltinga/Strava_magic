@@ -7,11 +7,22 @@ def create_kml(usertoken, df):
     client = Client(access_token=usertoken)
     # Initiate KML
     kml = simplekml.Kml()
+    limit_count = 0
+    i_lim = 1
     # Get gps data from every activity
-    for idx, row in tqdm(df.iterrows(), total=df.shape[0],desc='Creating KML file' ):
-        if idx % 500 == 0 and idx > 1:  # To prevent exceeding strava limits
+    for a, row in tqdm(df.iterrows(), total=df.shape[0],desc='Creating KML file' ):
+
+        limit_count += 1
+        if limit_count > (580 * i_lim):  # To prevent exceeding strava limits
+            LimitFlag = 1
+            i_lim += 1
             print('Waiting for STRAVA API limits.')
-            time.sleep(900)
+            while LimitFlag == 1:
+                time.sleep(20)  # Wait 30 seconds
+                checktime = time.localtime()
+                if checktime.tm_min % 15 == 0:
+                    LimitFlag = 0
+
         id = row['id']
         types = ['latlng']
         streams = client.get_activity_streams(id, types=types, resolution='medium')

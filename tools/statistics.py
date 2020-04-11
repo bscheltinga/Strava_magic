@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import timezone
 import collections
+from string import punctuation
 
 def h_index(df, figures=False):
     # Sum activities per day
@@ -97,11 +98,41 @@ def trindex(df):
 def word_usage(df):
     words = []
     for i in range(len(df)):
-        words = words + df['name'][i].split()
+        last_act = df['name'][i].split()
+
+        words = words + last_act
     top_words = collections.Counter(map(str.lower, words)).most_common(20)
     print(top_words)
     return top_words
 
+def StevenKruijswijkcoeff(df): # Calculates the Steven Kruijswijk Coefficient. (ratio between move/elapsed time)
+    SKC = {}
+    hours = {}
+    for i in range(len(df)):
+        SKC[i] = ((get_sec(df.moving_time[i])) / (get_sec(df.elapsed_time[i])))*100
+        hours[i] = get_sec(df.elapsed_time[i])/3600
+    df['SKC'] = SKC.values()
+    df['hours'] = hours.values()
+
+    df_social = df.loc[(df['athlete_count'] > 1)]
+    df_remy = df.loc[(df['athlete_count'] == 1)]
+    time_social = df_social['hours'].tolist()
+    time_remy = df_remy['hours'].tolist()
+    SKC_social = df_social['SKC'].tolist()
+    SKC_remy = df_remy['SKC'].tolist()
+
+    plt.scatter(time_remy,SKC_remy,  label= 'Remy')
+    plt.scatter(time_social, SKC_social, label= 'social')
+    plt.xlabel('Total riding time [hours]')
+    plt.ylabel('Steven Kruiswijk Coefficient')
+    plt.title('Steven Kruiswijk plot')
+    plt.legend()
+    plt.show()
+
+
+def get_sec(time_str):
+    h, m, s = time_str.split(':')
+    return int(h) * 3600 + int(m) * 60 + int(s)
 def avg_speed(df):
     # Calculate
     mean_time = (df['moving_time'] / np.timedelta64(1, 's')).mean()

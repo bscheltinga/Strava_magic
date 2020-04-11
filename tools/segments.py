@@ -29,8 +29,6 @@ def segmentlist(user_token, df):
                          'KOM_time': last_act.segment_efforts[i].segment.leaderboard.entries[1].elapsed_time
                          }
 
-                if entry['id'] == 15991054:
-                    testdebug = 10
 
                 for j in reversed(range(len(last_act.segment_efforts[i].segment.leaderboard.entries))):
                     if str(last_act.segment_efforts[i].segment.leaderboard.entries[j].athlete_name) == 'Bouke S.':
@@ -43,6 +41,7 @@ def segmentlist(user_token, df):
 
                 df_segments = df_segments.append(entry, ignore_index=True)
                 limit_count = len(df_segments) + idx  # Found that 1 for each unique seg and 1 for each act.
+                entry = []
 
                 if limit_count > (580*i_lim):  # To prevent exceeding strava limits
                     LimitFlag = 1
@@ -68,6 +67,7 @@ def segmentlist(user_token, df):
     #df_segments['Avg_pace'] = # min/km
 
     #Calculate GosCore
+    df_segments.to_excel(r'data\Segments.xlsx')
     df_segments = df_segments.sort_values(by=['GosCore'],ascending=False)
     GosCore = df_segments['GosCore'].cumsum()
     GosCore_max = df_segments['GosCore_max'].cumsum()
@@ -79,6 +79,7 @@ def segmentlist(user_token, df):
             'GosCore: %.2f out of %.2f' % (round(GosCore.values[index] / (index+1), 2)
                                            , round(GosCore_max.values[index] / (index+1), 2)))
     df_segments.to_excel(r'data\Segmentsv2.xlsx')
+    df_segments.to_excel(r'data\Segments.xlsx')
 
 
     return df_segments
