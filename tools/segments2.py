@@ -35,6 +35,15 @@ class SegmentsHandler(object):
                  'efforts': int(segmenteffort.segment.leaderboard.effort_count),
                  'KOM_time': segmenteffort.segment.leaderboard.entries[1].elapsed_time
                  }
+
+        for i in reversed(range(len(segmenteffort.segment.leaderboard.entries))):
+            if str(segmenteffort.segment.leaderboard.entries[i].athlete_name) == 'Bouke S.':
+                datarow['rank'] = segmenteffort.segment.leaderboard.entries[i].rank
+                datarow['elapsed_time'] = segmenteffort.segment.leaderboard.entries[
+                    i].elapsed_time
+                datarow['pr_date'] = segmenteffort.segment.leaderboard.entries[
+                    i].start_date_local
+                
         return datarow
 
     def __getActivities(self):
@@ -74,8 +83,7 @@ class SegmentsHandler(object):
         return df
 
     def __savefile(self, df):
-        __self.test = 10 #Do not save
-        # df.to_excel(self.__activitiesfile)
+        df.to_excel(self.__activitiesfile)
 
     def sync(self, force=False):
         if os.path.isfile(self.__segmentsfile) and not force:
