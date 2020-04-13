@@ -1,5 +1,6 @@
 import os.path
 import pandas as pd
+import time
 from stravalib import Client
 
 
@@ -22,6 +23,16 @@ class SegmentsHandler(object):
         if not os.path.isdir(self.__datafolder):
             os.mkdir(self.__datafolder)
 
+    def __waitAPIlimits(self):
+        LimitFlag = 1
+        self.__ApiLimitCounter = 0
+        print('Waiting for STRAVA API limits.')
+        while LimitFlag == 1:
+            time.sleep(15)  # Wait 15 seconds
+            checktime = time.localtime()
+            if checktime.tm_min % 15 == 0:
+                LimitFlag = 0
+
     def __handleActivity(self, activity):
         datarow = {'id': int(activity.id)}
         return datarow
@@ -43,7 +54,7 @@ class SegmentsHandler(object):
                     i].elapsed_time
                 datarow['pr_date'] = segmenteffort.segment.leaderboard.entries[
                     i].start_date_local
-                
+
         return datarow
 
     def __getActivities(self):
@@ -60,6 +71,9 @@ class SegmentsHandler(object):
             if (last_act.segment_efforts[i].segment.hazardous == 0 and (last_act.segment_efforts[i].segment.id) not in (self.__segmentIDs.values)): # Only for segments with a leaderboard and unique segments
                 entry = self.__handleSegment(last_act.segment_efforts[i])
                 df = df.append(entry, ignore_index=True)
+                self.__ApiLimitCounter += 1 # Add one for each unique segment
+                if self.__ApiLimitCounter > 590:
+                    self.__waitAPIlimits()
         return df
 
     def __setdatatypes(self, df):
@@ -103,7 +117,9 @@ class SegmentsHandler(object):
             entry = self.__getSegments(last_act)
             df = df.append(entry, ignore_index=True)
             self.__segmentIDs = df.id
-
+            self.__ApiLimitCounter += 1 # add one for each activity
+            if self.__ApiLimitCounter > 595:
+                self.__waitAPIlimits()
         df = self.__replacegearid(df)
         self.__savefile(df)
 
