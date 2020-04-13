@@ -8,8 +8,8 @@ class SegmentsHandler(object):
         self.__token = token
         self.__datafolder = datafolder
         self.__ApiLimitCounter = 580
-        self.__activitiesfile = os.path.join(self.__datafolder, 'segments.xlsx')
-
+        self.__segmentsfile = os.path.join(self.__datafolder, 'segments.xlsx')
+        self.__segmentIDs = pd.DataFrame()
         # Setup folders
         self.__setupfolders()
         # Initialize api client
@@ -48,7 +48,7 @@ class SegmentsHandler(object):
     def __getSegments(self, last_act):
         df = pd.DataFrame()
         for i in range(len(last_act.segment_efforts)):
-            if last_act.segment_efforts[i].segment.hazardous == 0: # Only for segments with a leaderboard
+            if (last_act.segment_efforts[i].segment.hazardous == 0 and (last_act.segment_efforts[i].segment.id) not in (self.__segmentIDs.values)): # Only for segments with a leaderboard and unique segments
                 entry = self.__handleSegment(last_act.segment_efforts[i])
                 df = df.append(entry, ignore_index=True)
         return df
@@ -78,7 +78,7 @@ class SegmentsHandler(object):
         # df.to_excel(self.__activitiesfile)
 
     def sync(self, force=False):
-        if os.path.isfile(self.__activitiesfile) and not force:
+        if os.path.isfile(self.__segmentsfile) and not force:
             self.__update()
         else:
             self.full_sync()
@@ -90,14 +90,15 @@ class SegmentsHandler(object):
         df = pd.DataFrame()
         print('**FULL SYNC SEGMENT LIST**')
         activities = self.__getActivities()
-        for i in range(len(activities)):
+        for i in range(3): # Only for x activities for DEBUG else: range(len(activities)):
             last_act = self.__api.get_activity(activity_id=activities.id[i], include_all_efforts=True)
             entry = self.__getSegments(last_act)
             df = df.append(entry, ignore_index=True)
+            self.__segmentIDs = df.id
 
         df = self.__replacegearid(df)
         self.__savefile(df)
 
     def get_data(self):
-        df = pd.read_excel(self.__activitiesfile)
+        df = pd.read_excel(self.__segmentsfile)
         return self.__setdatatypes(df)
