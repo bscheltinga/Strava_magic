@@ -1,5 +1,6 @@
 import tools.DataHandler as dh
 import tools.authorization as auth
+import tools.segments2 as seg
 import os
 import time
 import json
@@ -21,3 +22,7 @@ if __name__ == '__main__':
     # Get latest data
     data.sync()
     df = data.get_data()
+
+    # Create segments list data handeler object
+    segments = seg.SegmentsHandler(access_token,'data')
+    segments.sync()
