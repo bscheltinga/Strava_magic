@@ -1,112 +1,88 @@
-import os.path
-import pandas as pd
 import time
+
+import numpy as np
+import pandas as pd
 from stravalib import Client
 
 
-class SegmentsHandler(object):
-    def __init__(self, token, datafolder='data'):
-        self.__token = token
-        self.__datafolder = datafolder
-        self.__ApiLimitCounter = 20
-        self.__segmentsfile = os.path.join(self.__datafolder, 'segments.xlsx')
-        self.__segmentIDs = pd.DataFrame()
-        # Setup folders
-        self.__setupfolders()
-        # Initialize api client
-        self.__connect(token)
+def segmentlist(user_token, df):
+    client = Client(access_token=user_token)
+    df_segments = pd.DataFrame()
+    df_segments['id'] = np.nan  # make the id column
+    idx = 0
+    i_lim = 1  # For the limit counter
+    limit_count = 0
+    for a, row in df.iterrows():
+        id = float(row['id'])  # Make float to compare with the DF
+        last_act = client.get_activity(activity_id=id, include_all_efforts=True)  # Get activity
 
-    def __connect(self, token):
-        self.__api = Client(access_token=token)
-
-    def __setupfolders(self):
-        if not os.path.isdir(self.__datafolder):
-            os.mkdir(self.__datafolder)
-
-    def __waitAPIlimits(self):
-        LimitFlag = 1
-        self.__ApiLimitCounter = 0
-        print('Waiting for STRAVA API limits.')
-        while LimitFlag == 1:
-            time.sleep(15)  # Wait 15 seconds
-            checktime = time.localtime()
-            if checktime.tm_min % 15 == 0:
-                LimitFlag = 0
-
-    def __handleSegment(self, segmenteffort):
-        datarow = {'id': int(segmenteffort.segment.id),
-                   'name': str(segmenteffort.name),
-                   'distance': float(segmenteffort.distance.num),
-                   'activity_type': str(segmenteffort.segment.activity_type),
-                   'average_grade': float(segmenteffort.segment.average_grade),
-                   'efforts': int(segmenteffort.segment.leaderboard.effort_count),
-                   'KOM_time': segmenteffort.segment.leaderboard.entries[1].elapsed_time
-                   # 'avg_HR': float(segmenteffort.average_heartrate),
-                   # 'avg_Watts': float(segmenteffort.average_watts)
-                   }
-
-        for i in reversed(range(len(segmenteffort.segment.leaderboard.entries))):
-            if str(segmenteffort.segment.leaderboard.entries[i].athlete_name) == 'Bouke S.':
-                datarow['rank'] = segmenteffort.segment.leaderboard.entries[i].rank
-                datarow['elapsed_time'] = segmenteffort.segment.leaderboard.entries[i].elapsed_time
-                datarow['pr_date'] = segmenteffort.segment.leaderboard.entries[i].start_date_local
-
-        return datarow
-
-    def __getActivities(self):
-        df = pd.DataFrame()
-        activities = self.__api.get_activities()
-        for i, activity in enumerate(activities):
-            entry = {'id': int(activity.id)}
-            df = df.append(entry, ignore_index=True)
-        return df
-
-    def __getSegments(self, last_act):
-        df = pd.DataFrame()
         for i in range(len(last_act.segment_efforts)):
-            if (last_act.segment_efforts[i].segment.hazardous == 0 and (last_act.segment_efforts[i].segment.id) not in (
-                    self.__segmentIDs.values)):  # Only for segments with a leaderboard and unique segments
-                entry = self.__handleSegment(last_act.segment_efforts[i])
-                df = df.append(entry, ignore_index=True)
-                self.__ApiLimitCounter += 1  # Add one for each unique segment
-                if self.__ApiLimitCounter > 590:
-                    self.__waitAPIlimits()
-        return df
+            segment_id = last_act.segment_efforts[i].segment.id
+            if (last_act.segment_efforts[i].segment.hazardous == 0 and
+                    sum(df_segments['id'].isin([segment_id])) == 0):  # Only for unique segments
+                print('Activities: %i / %i | Segments: %i / %i | Limits: %i' %
+                      (idx, len(df), i, len(last_act.segment_efforts), limit_count))
+                entry = {'id': int(last_act.segment_efforts[i].segment.id),
+                         'name': last_act.segment_efforts[i].name,
+                         'distance': float(last_act.segment_efforts[i].distance.num),
+                         'activity_type': str(last_act.type),
+                         'average_grade': last_act.segment_efforts[i].segment.average_grade,
+                         'efforts': last_act.segment_efforts[i].segment.leaderboard.effort_count,
+                         'KOM_time': last_act.segment_efforts[i].segment.leaderboard.entries[1].elapsed_time
+                         }
 
-    def __setdatatypes(self, df):
-        df['pr_date'] = pd.to_datetime(df['pr_date'])
-        df['elapsed_time'] = pd.to_timedelta(df['elapsed_time']) * 24 * 60 # Convert to minutes
-        df['KOM_time'] = pd.to_timedelta(df['KOM_time']) * 24 * 60  # Convert to minutes
-        return df
+                for j in reversed(range(len(last_act.segment_efforts[i].segment.leaderboard.entries))):
+                    if str(last_act.segment_efforts[i].segment.leaderboard.entries[j].athlete_name) == 'Bouke S.':
+                        entry['rank'] = last_act.segment_efforts[i].segment.leaderboard.entries[j].rank
+                        entry['elapsed_time'] = last_act.segment_efforts[i].segment.leaderboard.entries[
+                            j].elapsed_time
+                        entry['pr_date'] = last_act.segment_efforts[i].segment.leaderboard.entries[
+                            j].start_date_local
+                        break
 
-    def __savefile(self, df):
-        df.to_excel(self.__segmentsfile)
+                df_segments = df_segments.append(entry, ignore_index=True)
+                limit_count = len(df_segments) + idx  # Found that 1 for each unique seg and 1 for each act.
+                entry = []
 
-    def sync(self, force=False):
-        if os.path.isfile(self.__segmentsfile) and not force:
-            self.__update()
-        else:
-            self.full_sync()
+                if limit_count > (580 * i_lim):  # To prevent exceeding strava limits
+                    LimitFlag = 1
+                    i_lim += 1
+                    print('Waiting for STRAVA API limits.')
+                    while LimitFlag == 1:
+                        time.sleep(20)  # Wait 30 seconds
+                        checktime = time.localtime()
+                        if checktime.tm_min % 15 == 0:
+                            LimitFlag = 0
 
-    def __update(self):
-        print('*UPDATE SEGMENT LIST*')
-        print('To be coded.')
+        idx += 1
+        if idx == 99999:  # Only first 1500 activities
+            break
 
-    def full_sync(self):
-        df = pd.DataFrame()
-        print('**FULL SYNC SEGMENT LIST**')
-        activities = self.__getActivities()
-        for i in range(len(activities)):
-            last_act = self.__api.get_activity(activity_id=activities.id[i], include_all_efforts=True)
-            entry = self.__getSegments(last_act)
-            df = df.append(entry, ignore_index=True)
-            self.__segmentIDs = df.id
-            self.__ApiLimitCounter += 1  # add one for each activity
-            if self.__ApiLimitCounter > 595:
-                self.__waitAPIlimits()
-        df = self.__setdatatypes(df)
-        self.__savefile(df)
+    df_segments['Perc_rank'] = (df_segments['rank'] / df_segments['efforts']) * 100
+    df_segments['distance'] = df_segments['distance'] / 1000
+    df_segments['GosCore'] = -np.log10(df_segments['rank'] / df_segments['efforts'])
+    df_segments['GosCore_max'] = -np.log10(1 / df_segments['efforts'])
+    # df_segments['seconds'] = pd.to_timedelta(df_segments['elapsed_time'])
+    # df_segments['seconds'] = pd.Series.dt.total_seconds(df_segments['seconds'])
+    # df_segments['Avg_speed'] = # km/h
+    # df_segments['Avg_pace'] = # min/km
 
-    def get_data(self):
-        df = pd.read_excel(self.__segmentsfile)
-        return self.__setdatatypes(df)
+    # Calculate GosCore
+    df_segments.to_excel(r'data\Segments.xlsx')
+    df_segments = df_segments.sort_values(by=['GosCore'], ascending=False)
+    GosCore = df_segments['GosCore'].cumsum()
+    GosCore_max = df_segments['GosCore_max'].cumsum()
+    if len(GosCore) > 98:
+        print(
+            'GosCore: %.2f out of %.2f' % (round(GosCore.values[99] / 100, 2), round(GosCore_max.values[99] / 100, 2)))
+    else:
+        index = int(len(GosCore) - 1)
+        print(
+            'GosCore: %.2f out of %.2f' % (round(GosCore.values[index] / (index + 1), 2)
+                                           , round(GosCore_max.values[index] / (index + 1), 2)))
+    df_segments.to_excel(r'data\Segmentsv2.xlsx')
+    df_segments.to_excel(r'data\Segments.xlsx')
+
+    return df_segments
+
+# TO ADD: avg speed, avg pace, goscore
