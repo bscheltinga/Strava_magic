@@ -6,7 +6,6 @@ import numpy as np
 # assuming act. has HR_data
 # b_trimp: implementation of Banister' trimp (avg_hr*duration)
 
-
 def b_trimp(df):
     trimp_df = pd.DataFrame()
     df = df.loc[df['has_heartrate'] == True]
@@ -16,6 +15,7 @@ def b_trimp(df):
     return trimp_df
 
 def create_ff_df(df):
+    df = df.loc[df['has_heartrate'] == True]
     ff_df = pd.DataFrame()
     start = df.index[0]
     start = df['start_date'][start]
@@ -49,14 +49,15 @@ def ff_model(ff_df,params):
     
     for i in range(len(ff_df)):
         if i == 0:
-            ff_df['fitness'][0] = 0 + (ff_df['b_trimp'][0] - 0)*(1-np.exp(-1/42))
-            ff_df['fatigue'][0] = 0 + (ff_df['b_trimp'][0] - 0)*(1-np.exp(-1/7))
+            ff_df['fitness'][0] = 0 + (ff_df['b_trimp'][0] - 0)*(1-np.exp(-1/params[0]))
+            ff_df['fatigue'][0] = 0 + (ff_df['b_trimp'][0] - 0)*(1-np.exp(-1/params[1]))
             ff_df['form'][0] = 0
         else:
-            ff_df['fitness'][i] = ff_df['fitness'][i-1] + (ff_df['b_trimp'][i] - ff_df['fitness'][i-1])*(1-np.exp(-1/42))
-            ff_df['fatigue'][i] = ff_df['fatigue'][i-1] + (ff_df['b_trimp'][i] - ff_df['fatigue'][i-1])*(1-np.exp(-1/7))
+            ff_df['fitness'][i] = ff_df['fitness'][i-1] + (ff_df['b_trimp'][i] - ff_df['fitness'][i-1])*(1-np.exp(-1/params[0]))
+            ff_df['fatigue'][i] = ff_df['fatigue'][i-1] + (ff_df['b_trimp'][i] - ff_df['fatigue'][i-1])*(1-np.exp(-1/params[1]))
             ff_df['form'][i] = ff_df['fitness'][i-1] - ff_df['fatigue'][i-1]
             
+    return ff_df
     
 def make_plot(ff_df):
     # Plot trimp over time
@@ -71,3 +72,11 @@ def make_plot(ff_df):
     plt.xticks(rotation=45)
     plt.subplots_adjust(bottom=0.2)
     plt.legend()
+    
+params = [42, 7] # fatigue effect for 7 and fitness effect for 42 days.
+trimp_df = b_trimp(df)
+ff_df = create_ff_df(df)
+ff_df = trimp_to_ff_df (trimp_df,ff_df)
+
+ff_df = ff_model(ff_df,params)
+make_plot(ff_df)
