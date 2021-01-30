@@ -63,7 +63,7 @@ def hr_vs_speed(df):
     speed = np.array(df['average_speed'].tolist()) * 3.6
     hr = df['average_heartrate'].tolist()
     plt.plot(speed, hr, 'r*')
-    plt.title('Heart rate vs Speed plot')
+    plt.title('Avg hart rate vs avg speed plot')
     plt.xlabel('Speed [km/h]')
     plt.ylabel('Heart rate [bpm]')
     plt.show()
