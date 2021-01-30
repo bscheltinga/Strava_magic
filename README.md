@@ -17,6 +17,8 @@ Flow:
 2. Download data since last time and update alldata(.csv?)
 3. Do the things with the alldata file.
 
+NOTE: segment list is not working due to changes in strava api protocol.
+
 To do
 - Alle top 10 segmenten in lijst
 - Segment H-index
