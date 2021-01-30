@@ -2,36 +2,41 @@
 from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 # assuming act. has HR_data
 # b_trimp: implementation of Banister' trimp (avg_hr*duration)
 
 
 def b_trimp(df):
+    trimp_df = pd.DataFrame()
     df = df.loc[df['has_heartrate'] == True]
-    b_trimps = (df['moving_time'] / np.timedelta64(1, 'h')) * df['average_heartrate']
-    return b_trimps
+    trimp_df['date'] = df['start_date']
+    trimp_df['trimp'] = (df['moving_time'] / np.timedelta64(1, 'h')) * df['average_heartrate']
+    trimp_df = trimp_df.reset_index(drop=True)
+    return trimp_df
 
 def create_ff_df(df):
     ff_df = pd.DataFrame()
     start = df.index[0]
+    start = df['start_date'][start]
     start = datetime.fromtimestamp(start.timestamp())
-    end = datetime.today() + datetime.timedelta(days=14)
-    days = ((end-start).days)+1
+    end = datetime.today()
+    days = ((end-start).days)+15 # add some days for future view
     datelist = pd.date_range(start, periods=days).tolist()
     ff_df['date'] = datelist
     
     return ff_df
 
-def trimp_to_ff_df (b_trimps,ff_df):
+def trimp_to_ff_df (trimp_df,ff_df):
     # loop over all dates in df
     # does not work for multiple activities on one day
     ff_df['b_trimp'] = np.zeros(len(ff_df))
     j = 0
-    for i in range(len(b_trimps)):
+    for i in range(len(trimp_df)):
         flag=True
         while flag == True:
-            if b_trimps.index[i].date() == ff_df['date'][j].date():
-                ff_df['b_trimp'][j] = ff_df['b_trimp'][j] + b_trimps[i]
+            if trimp_df['date'][i].date() == ff_df['date'][j].date():
+                ff_df['b_trimp'][j] = ff_df['b_trimp'][j] + trimp_df['trimp'][i]
                 flag = False
             else:
                 j += 1                
@@ -56,12 +61,13 @@ def ff_model(ff_df,params):
 def make_plot(ff_df):
     # Plot trimp over time
     plt.figure()
-    plt.plot(ff_df['date'], ff_df['b_trimp'],label='Banister TRIMP')
+#    plt.plot(ff_df['date'], ff_df['b_trimp'],label='Banister TRIMP')
     plt.plot(ff_df['date'], ff_df['fatigue'],label='Fatigue')
     plt.plot(ff_df['date'], ff_df['fitness'],label='Fitness')
     plt.plot(ff_df['date'], ff_df['form'],label='Form')
     plt.hlines(0, ff_df['date'].loc[0], ff_df['date'].iloc[-1], linestyles='dashed')
     plt.vlines(ff_df['date'].iloc[-14],-500,500, linestyles='dashed')
+    plt.title('Fitness-Fatigue model')
     plt.xticks(rotation=45)
     plt.subplots_adjust(bottom=0.2)
     plt.legend()
