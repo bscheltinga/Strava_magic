@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 # assuming act. has HR_data
 # b_trimp: implementation of Banister' trimp (avg_hr*duration)
+# other trimp methods could be implemented
+# gains for fitness and fatigue could be implemented
+# delay in fitness response could be implemented.
 
 def b_trimp(df):
     trimp_df = pd.DataFrame()
