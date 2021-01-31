@@ -50,14 +50,28 @@ def ff_model(ff_df,params):
     ff_df['fatigue'] = np.zeros(len(ff_df))
     ff_df['form'] = np.zeros(len(ff_df))
     
+#    # Model equations according to trainingpeaks/elevate    
+#    for i in range(len(ff_df)):
+#        if i == 0:
+#            ff_df['fitness'][0] = 0 + (ff_df['b_trimp'][0] - 0)*(1-np.exp(-1/params[0]))
+#            ff_df['fatigue'][0] = 0 + (ff_df['b_trimp'][0] - 0)*(1-np.exp(-1/params[1]))
+#            ff_df['form'][0] = 0
+#        else:
+#            ff_df['fitness'][i] = ff_df['fitness'][i-1] + (ff_df['b_trimp'][i] - ff_df['fitness'][i-1])*(1-np.exp(-1/params[0]))
+#            ff_df['fatigue'][i] = ff_df['fatigue'][i-1] + (ff_df['b_trimp'][i] - ff_df['fatigue'][i-1])*(1-np.exp(-1/params[1]))
+#            ff_df['form'][i] = ff_df['fitness'][i-1] - ff_df['fatigue'][i-1]
+            
+    # Model equations according to equation 10/11 from
+    # B. S. Hemingway, L. Greig, and P. Swinton, “A NARRATIVE REVIEW OF MATHEMATICAL FITNESS-FATIGUE MODELLING FOR APPLICATIONS IN EXERCISE SCIENCE: MODEL DYNAMICS, METHODS, LIMITATIONS, AND FUTURE RECOMMENDATIONS A,” 2020, doi: 10.31236/osf.io/ap75j.
+    # fitness/fatigue = Value yesterday*exp(param) + workload
     for i in range(len(ff_df)):
         if i == 0:
-            ff_df['fitness'][0] = 0 + (ff_df['b_trimp'][0] - 0)*(1-np.exp(-1/params[0]))
-            ff_df['fatigue'][0] = 0 + (ff_df['b_trimp'][0] - 0)*(1-np.exp(-1/params[1]))
+            ff_df['fitness'][0] = 0 + (ff_df['b_trimp'][0])
+            ff_df['fatigue'][0] = 0 + (ff_df['b_trimp'][0])
             ff_df['form'][0] = 0
         else:
-            ff_df['fitness'][i] = ff_df['fitness'][i-1] + (ff_df['b_trimp'][i] - ff_df['fitness'][i-1])*(1-np.exp(-1/params[0]))
-            ff_df['fatigue'][i] = ff_df['fatigue'][i-1] + (ff_df['b_trimp'][i] - ff_df['fatigue'][i-1])*(1-np.exp(-1/params[1]))
+            ff_df['fitness'][i] = ff_df['fitness'][i-1]*(np.exp(-1/params[0])) + ff_df['b_trimp'][i]
+            ff_df['fatigue'][i] = ff_df['fatigue'][i-1]*(np.exp(-1/params[1])) + ff_df['b_trimp'][i]
             ff_df['form'][i] = ff_df['fitness'][i-1] - ff_df['fatigue'][i-1]
             
     return ff_df
@@ -76,7 +90,7 @@ def make_plot(ff_df):
     plt.subplots_adjust(bottom=0.2)
     plt.legend()
     
-params = [42, 7] # fatigue effect for 7 and fitness effect for 42 days.
+params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
 trimp_df = b_trimp(df)
 ff_df = create_ff_df(df)
 ff_df = trimp_to_ff_df (trimp_df,ff_df)
