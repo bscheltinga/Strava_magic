@@ -55,25 +55,36 @@ class ActivityHandler(object):
     
     def __calcFeatures(self, df):
         types = ['time', 'velocity_smooth', 'heartrate', 'distance', 'moving']
+        
+        # Initiate features
         df['norm_hr'] = np.NaN
+        df['norm_speed'] = np.NaN
+        
+        # Loop and calculate features
         for i in range(len(df)):
             # Both HR and RUN
             if df['type'][i] == 'Run' and df['has_heartrate'][i] == True:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='medium')
                 
+                # ADD FEATURES HERE
                 df['norm_hr'][i] = np.mean(np.power(streams['heartrate'].data,4))**(1/4)
+                df['norm_speed'][i] = np.mean(np.power(streams['velocity_smooth'].data,4))**(1/4)
 
             if df['type'][i] != 'Run' and df['has_heartrate'][i] == True:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='medium')
                 
                 df['norm_hr'][i] = np.mean(np.power(streams['heartrate'].data,4))**(1/4)
                 
-#            if df['type'][i] == 'Run' and df['has_heartrate'][i] == False:
+            if df['type'][i] == 'Run' and df['has_heartrate'][i] == False:
+                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='medium')
+                
+                df['norm_speed'][i] = np.mean(np.power(streams['velocity_smooth'].data,4))**(1/4)
 
-#            else:
-#                entry = {'Normalized_hr': np.NaN
-#                        }
-        return df
+            self.__ApiLimitCounter += 1  # add one for each activity or stream???
+            if self.__ApiLimitCounter > 595:
+                self.__waitAPIlimits()
+            self.__savefile(df)
+            return df
                 
       
     def __savefile(self, df):
@@ -102,15 +113,11 @@ class ActivityHandler(object):
 
     def full_sync(self):
         print('**FULL SYNC ACTIVITY FEATURES LIST**')
-        activities = self.__api.get_activities(limit=10)
+        activities = self.__api.get_activities()
         df = self.__ActivityHandler(activities)
         df = self.__calcFeatures(df)
         print('resulted in datafile with %i activities' % len(df))
 
-        self.__ApiLimitCounter += 1  # add one for each activity or stream???
-        if self.__ApiLimitCounter > 595:
-            self.__waitAPIlimits()
-        self.__savefile(df)
 
     def get_data(self):
         df = pd.read_excel(self.__featuresfile)
