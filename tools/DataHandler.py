@@ -70,7 +70,7 @@ class DataHandler(object):
         return df
 
     def __savefile(self, df):
-        df.to_excel(self.__activitiesfile)
+        df.to_excel(self.__activitiesfile, index=False)
 
     def sync(self, force=False):
         if os.path.isfile(self.__activitiesfile) and not force:
@@ -90,8 +90,9 @@ class DataHandler(object):
             df_new = df_new.append(entry, ignore_index=True)
         print('resulted in datafile with %i new activities' % (i + 1))
         if i + 1 > 0:
+            df_new = df_new.iloc[::-1]
             df_new = self.__replacegearid(df_new)
-            df = pd.concat([df, df_new])
+            df = pd.concat([df_new, df])
             self.__savefile(df)
 
     def full_sync(self):
@@ -104,8 +105,8 @@ class DataHandler(object):
             df = df.append(entry, ignore_index=True)
         # reverse index so latest has highest number
         df.index = reversed(range(len(df)))
-        # flip list so lastest is on the bottom
-        df = df.iloc[::-1]
+#        # flip list so lastest is on the bottom
+#        df = df.iloc[::-1]
         print('resulted in datafile with %i activities' % (i + 1))
         df = self.__replacegearid(df)
         self.__savefile(df)
