@@ -30,6 +30,7 @@ class ActivityHandler(object):
             time.sleep(15)  # Wait 15 seconds
             checktime = time.localtime()
             if checktime.tm_min % 15 == 0:
+                print('Continuing syncing')
                 LimitFlag = 0
                 
     def __setdatatypes(self, df):
@@ -72,23 +73,27 @@ class ActivityHandler(object):
         for i in range(len(df)):
             # Both HR and RUN
             if df['type'][i] == 'Run' and df['has_heartrate'][i] == True:
-                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='medium')
+                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='high')
+                self.__ApiLimitCounter += 1  # add one for each activity stream
                 
                 # ADD FEATURES HERE
                 df['norm_hr'][i] = np.mean(np.power(streams['heartrate'].data,4))**(1/4)
                 df['norm_speed'][i] = np.mean(np.power(streams['velocity_smooth'].data,4))**(1/4)
 
             if df['type'][i] != 'Run' and df['has_heartrate'][i] == True:
-                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='medium')
+                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='high')
+                self.__ApiLimitCounter += 1  # add one for each activity stream
                 
+                # Add features here
                 df['norm_hr'][i] = np.mean(np.power(streams['heartrate'].data,4))**(1/4)
                 
             if df['type'][i] == 'Run' and df['has_heartrate'][i] == False:
-                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='medium')
+                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='high')
+                self.__ApiLimitCounter += 1  # add one for each activity stream
                 
+                # Add features here
                 df['norm_speed'][i] = np.mean(np.power(streams['velocity_smooth'].data,4))**(1/4)
 
-            self.__ApiLimitCounter += 1  # add one for each activity
             if self.__ApiLimitCounter > 595:
                 self.__waitAPIlimits()
         return df
