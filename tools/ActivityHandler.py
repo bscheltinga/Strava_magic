@@ -95,7 +95,9 @@ class ActivityHandler(object):
         df_new = self.__calcFeatures(df_new)
         print('resulted in datafile with %i new activities' % (len(df_new)))
         if len(df_new) > 0:
-            df = pd.concat([df, df_new], sort=True)
+            df_new.index = reversed(range(len(df_new)))
+            df_new = df_new.iloc[::-1]
+            df = pd.concat([df_new, df], sort=True)
             self.__savefile(df)
 
     def full_sync(self):
@@ -103,11 +105,6 @@ class ActivityHandler(object):
         activities = self.__api.get_activities(limit=10)
         df = self.__ActivityHandler(activities)
         df = self.__calcFeatures(df)
-        
-        # reverse index so latest has highest number
-        df.index = reversed(range(len(df)))
-        # flip list so lastest is on the bottom
-        df = df.iloc[::-1]
         print('resulted in datafile with %i activities' % len(df))
 
         self.__ApiLimitCounter += 1  # add one for each activity or stream???
