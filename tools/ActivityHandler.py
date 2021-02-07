@@ -31,6 +31,14 @@ class ActivityHandler(object):
             checktime = time.localtime()
             if checktime.tm_min % 15 == 0:
                 LimitFlag = 0
+                
+    def __setdatatypes(self, df):
+        # alternative in case of errors df["start_date"] = df["start_date"].astype("datetime64")
+        # alternative in case of errors df['moving_time'] = df["start_date"].astype('timedelta64[s]')
+        df['start_date'] = pd.to_datetime(df['start_date'])
+        df['moving_time'] = pd.to_timedelta(df['moving_time'])
+        df['elapsed_time'] = pd.to_timedelta(df['elapsed_time'])
+        return df
 
     def __ActivityHandler(self,activities):
         df = pd.DataFrame()
@@ -80,11 +88,10 @@ class ActivityHandler(object):
                 
                 df['norm_speed'][i] = np.mean(np.power(streams['velocity_smooth'].data,4))**(1/4)
 
-            self.__ApiLimitCounter += 1  # add one for each activity or stream???
+            self.__ApiLimitCounter += 1  # add one for each activity
             if self.__ApiLimitCounter > 595:
                 self.__waitAPIlimits()
-            self.__savefile(df)
-            return df
+        return df
                 
       
     def __savefile(self, df):
@@ -117,7 +124,7 @@ class ActivityHandler(object):
         df = self.__ActivityHandler(activities)
         df = self.__calcFeatures(df)
         print('resulted in datafile with %i activities' % len(df))
-
+        self.__savefile(df)
 
     def get_data(self):
         df = pd.read_excel(self.__featuresfile)
