@@ -77,7 +77,7 @@ class ActivityHandler(object):
                 
       
     def __savefile(self, df):
-        df.to_excel(self.__featuresfile)
+        df.to_excel(self.__featuresfile, index=False)
         
 
     def sync(self, force=False):
@@ -88,18 +88,14 @@ class ActivityHandler(object):
 
     def __update(self):
         print('*UPDATE ACTIVITY FEATURES LIST*')
-        i = -1
-        df = pd.read_excel(self.__activitiesfile)
-        df_new = pd.DataFrame()
+        df = pd.read_excel(self.__featuresfile)
         latest = pd.to_datetime(df['start_date']).max()
         activities = self.__api.get_activities(after=latest)
-        for i, activity in enumerate(activities):
-            entry = self.__handleActivity(activity)
-            df_new = df_new.append(entry, ignore_index=True)
-        print('resulted in datafile with %i new activities' % (i + 1))
-        if i + 1 > 0:
-            df_new = self.__replacegearid(df_new)
-            df = pd.concat([df, df_new])
+        df_new = self.__ActivityHandler(activities)
+        df_new = self.__calcFeatures(df_new)
+        print('resulted in datafile with %i new activities' % (len(df_new)))
+        if len(df_new) > 0:
+            df = pd.concat([df, df_new], sort=True)
             self.__savefile(df)
 
     def full_sync(self):
@@ -107,6 +103,12 @@ class ActivityHandler(object):
         activities = self.__api.get_activities(limit=10)
         df = self.__ActivityHandler(activities)
         df = self.__calcFeatures(df)
+        
+        # reverse index so latest has highest number
+        df.index = reversed(range(len(df)))
+        # flip list so lastest is on the bottom
+        df = df.iloc[::-1]
+        print('resulted in datafile with %i activities' % len(df))
 
         self.__ApiLimitCounter += 1  # add one for each activity or stream???
         if self.__ApiLimitCounter > 595:
