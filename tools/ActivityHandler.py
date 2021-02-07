@@ -32,9 +32,8 @@ class ActivityHandler(object):
             if checktime.tm_min % 15 == 0:
                 LimitFlag = 0
 
-    def __getActivities(self):
+    def __ActivityHandler(self,activities):
         df = pd.DataFrame()
-        activities = self.__api.get_activities(limit=10)
         for i, activity in enumerate(activities):
             entry = {
                     'id': int(activity.id),
@@ -90,7 +89,7 @@ class ActivityHandler(object):
     def __update(self):
         print('*UPDATE ACTIVITY FEATURES LIST*')
         i = -1
-        df = pd.read_excel(self.__featuresfile)
+        df = pd.read_excel(self.__activitiesfile)
         df_new = pd.DataFrame()
         latest = pd.to_datetime(df['start_date']).max()
         activities = self.__api.get_activities(after=latest)
@@ -105,13 +104,14 @@ class ActivityHandler(object):
 
     def full_sync(self):
         print('**FULL SYNC ACTIVITY FEATURES LIST**')
-        activities = self.__getActivities()
-        activities = self.__calcFeatures(activities)
+        activities = self.__api.get_activities(limit=10)
+        df = self.__ActivityHandler(activities)
+        df = self.__calcFeatures(df)
 
         self.__ApiLimitCounter += 1  # add one for each activity or stream???
         if self.__ApiLimitCounter > 595:
             self.__waitAPIlimits()
-        self.__savefile(activities)
+        self.__savefile(df)
 
     def get_data(self):
         df = pd.read_excel(self.__featuresfile)
