@@ -3,6 +3,7 @@ import pandas as pd
 import time
 from stravalib import Client
 import numpy as np
+import tools.act_features as feat
 
 class ActivityHandler(object):
     def __init__(self, token, datafolder='data'):
@@ -62,33 +63,44 @@ class ActivityHandler(object):
                 df = df.append(entry, ignore_index=True)
         return df
     
-    def __calcFeatures(self, df):
+    def __getFeatures(self, df):
         types = ['time', 'velocity_smooth', 'heartrate', 'distance', 'moving']
         
         # Initiate features
+        # HR features
+        df['std_hr'] = np.NaN
         df['norm_hr'] = np.NaN
+        
+        # Speed features
         df['norm_speed'] = np.NaN
+        df['std_speed'] = np.NaN
         
         # Loop and calculate features
         for i in range(len(df)):
             # Both HR and RUN
             if df['type'][i] == 'Run' and df['has_heartrate'][i] == True:
-                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='high')
+                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
                 self.__ApiLimitCounter += 1  # add one for each activity stream
                 
                 # ADD FEATURES HERE
-                df['norm_hr'][i] = np.mean(np.power(streams['heartrate'].data,4))**(1/4)
-                df['norm_speed'][i] = np.mean(np.power(streams['velocity_smooth'].data,4))**(1/4)
-
+                # HR features
+                df['norm_hr'][i] = feat.norm_hr(streams)
+                df['std_hr'][i] = feat.std_hr(streams)
+                
+                # Speed features
+                df['std_speed'][i] = feat.std_speed(streams)
+                df['norm_speed'][i] = feat.norm_speed(streams)
+                
             if df['type'][i] != 'Run' and df['has_heartrate'][i] == True:
-                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='high')
+                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
                 self.__ApiLimitCounter += 1  # add one for each activity stream
                 
-                # Add features here
+                # Add HR features here
                 df['norm_hr'][i] = np.mean(np.power(streams['heartrate'].data,4))**(1/4)
+                df['std_hr'][i] = feat.std_hr(streams)
                 
             if df['type'][i] == 'Run' and df['has_heartrate'][i] == False:
-                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types, resolution='high')
+                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
                 self.__ApiLimitCounter += 1  # add one for each activity stream
                 
                 # Add features here
@@ -115,7 +127,7 @@ class ActivityHandler(object):
         latest = pd.to_datetime(df['start_date']).max()
         activities = self.__api.get_activities(after=latest)
         df_new = self.__ActivityHandler(activities)
-        df_new = self.__calcFeatures(df_new)
+        df_new = self.__getFeatures(df_new)
         print('resulted in datafile with %i new activities' % (len(df_new)))
         if len(df_new) > 0:
             df_new.index = reversed(range(len(df_new)))
@@ -125,9 +137,9 @@ class ActivityHandler(object):
 
     def full_sync(self):
         print('**FULL SYNC ACTIVITY FEATURES LIST**')
-        activities = self.__api.get_activities()
+        activities = self.__api.get_activities(limit=10)
         df = self.__ActivityHandler(activities)
-        df = self.__calcFeatures(df)
+        df = self.__getFeatures(df)
         print('resulted in datafile with %i activities' % len(df))
         self.__savefile(df)
 
