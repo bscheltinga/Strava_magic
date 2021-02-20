@@ -61,3 +61,15 @@ def std_speed(streams):
     std_speed = np.std(np.array(streams['velocity_smooth'].data)[i])
     
     return std_speed
+
+def correct_hr(streams):
+    '''
+    Replace values >205 for the mean value
+    '''
+    threshold = 205
+    # Remove values above threshold and replace for np.nan
+    streams['heartrate'].data = [np.nan if i >=threshold else i for i in streams['heartrate'].data]
+    mean = np.nanmean(streams['heartrate'].data)
+    # Replace nans for mean value.
+    streams['heartrate'].data = [mean if np.isnan(i) == True else i for i in streams['heartrate'].data]
+    return streams
