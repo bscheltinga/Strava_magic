@@ -81,6 +81,7 @@ class ActivityHandler(object):
             if df['type'][i] == 'Run' and df['has_heartrate'][i] == True:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
                 self.__ApiLimitCounter += 1  # add one for each activity stream
+                streams = feat.correct_hr(streams)
                 
                 # ADD FEATURES HERE
                 # HR features
@@ -94,6 +95,7 @@ class ActivityHandler(object):
             if df['type'][i] != 'Run' and df['has_heartrate'][i] == True:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
                 self.__ApiLimitCounter += 1  # add one for each activity stream
+                streams = feat.correct_hr(streams)
                 
                 # Add HR features here
                 df['norm_hr'][i] = np.mean(np.power(streams['heartrate'].data,4))**(1/4)
