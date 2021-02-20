@@ -62,6 +62,20 @@ def std_speed(streams):
     
     return std_speed
 
+def dis_speed(streams,threshold=12, mode='high'):
+    '''
+    Calculate the distance covered above and below the set threshold
+    with mode: high or low. With high above the threshold and low below.
+    '''
+    threshold = threshold/3.6
+    if mode == 'low':
+        values = np.array([0 if i > threshold else i for i in streams['velocity_smooth'].data])
+    if mode == 'high':
+        values = np.array([0 if i <= threshold else i for i in streams['velocity_smooth'].data])
+    
+    dis_speed = np.sum(values[:-1]*np.diff(streams['time'].data))
+    return dis_speed
+
 def correct_hr(streams):
     '''
     Replace values >205 for the mean value
