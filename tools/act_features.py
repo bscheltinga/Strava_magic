@@ -19,6 +19,30 @@ def trimp_norm_hr(streams):
     trimp_norm_hr = norm_hr*duration_h
     return trimp_norm_hr
 
+def edwards_trimp(streams, hr_max=200):
+    '''
+    HR is corrected for zones (50-60%, 60-70%, 70-80%, 80-90% and 90-100% of HRmax)
+    Then, the time spend in each zone is multiplied by the zone number.
+    '''
+    # Calculate zone bottom value
+    z1 = 0.5*hr_max
+    z2 = 0.6*hr_max
+    z3 = 0.7*hr_max
+    z4 = 0.8*hr_max
+    z5 = 0.9*hr_max
+    
+    # Calculate HR IF moving
+    hr = streams['heartrate'].data[:-1]*np.array(streams['moving'].data[:-1])
+    
+    # Calculate time per zone
+    z1_values = hr
+    z2_values = np.array([0 if (i < z2 or i >= z3) else i for i in streams['heartrate'].data[:-1]]streams['moving'].data[:-1])
+    z3_values = np.array([0 if (i < z3 or i >= z4) else i for i in streams['heartrate'].data[:-1]]streams['moving'].data[:-1])
+    z4_values = np.array([0 if (i < z4 or i >= z5) else i for i in streams['heartrate'].data[:-1]]streams['moving'].data[:-1])
+    z5_values = np.array([0 if (i < z5) else i for i in streams['heartrate'].data[:-1]]streams['moving'].data[:-1])
+
+    return edwards_trimp
+
 
 def std_hr(streams):
     '''
