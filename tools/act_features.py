@@ -6,7 +6,7 @@ Lucia, Edwards, Banister trimps (werk Casteele, Gosseries)  #TODO
 '''
 
 # Heart rate features
-def norm_hr(streams):
+def trimp_norm_hr(streams):
     power = 4
     # Convert to int64 for ^4 calculation
     hr = [np.int64(i) for i in streams['heartrate'].data[:-1]]
@@ -14,8 +14,11 @@ def norm_hr(streams):
                streams['moving'].data[:-1]))
     time = sum(np.diff(streams['time'].data) * streams['moving'].data[:-1])   
     norm_hr = (hr_power/time)**(1/power)
-    
-    return norm_hr
+    duration_h = sum(np.array(np.diff(streams['time'].data)) * 
+                     np.array(streams['moving'].data[1:]))/3600
+    trimp_norm_hr = norm_hr*duration_h
+    return trimp_norm_hr
+
 
 def std_hr(streams):
     '''
@@ -37,15 +40,18 @@ def hrss(streams):
 
 # Velocity features
     
-def norm_speed(streams):
+def trimp_norm_distance(streams):
     power = 4
     # Convert to int64 for ^4 calculation
     speed_power = sum((np.diff(streams['time'].data) * np.power(streams['velocity_smooth'].data[:-1],power) *
                streams['moving'].data[:-1]))
     time = sum(np.diff(streams['time'].data) * streams['moving'].data[:-1])   
     norm_speed = (speed_power/time)**(1/power)
+    duration_h = sum(np.array(np.diff(streams['time'].data)) * 
+                     np.array(streams['moving'].data[1:]))/3600
+    trimp_norm_distance = norm_speed*duration_h
     
-    return norm_speed
+    return trimp_norm_distance
 
 
 def std_speed(streams):
@@ -62,10 +68,10 @@ def std_speed(streams):
     
     return std_speed
 
-def dis_speed(streams,threshold=12, mode='high'):
+def dis_speed(streams, threshold=12, mode='high'):
     '''
-    Calculate the distance covered above and below the set threshold
-    with mode: high or low. With high above the threshold and low below.
+    Calculate the distance (meters) covered above and below the set threshold 
+    (km/h) with mode: high or low. With high above the threshold and low below.
     '''
     threshold = threshold/3.6
     if mode == 'low':
@@ -76,9 +82,11 @@ def dis_speed(streams,threshold=12, mode='high'):
     dis_speed = np.sum(values[:-1]*np.diff(streams['time'].data))
     return dis_speed
 
+# Data correction functions
+    
 def correct_hr(streams):
     '''
-    Replace values >205 for the mean value
+    Replace values >205 for the mean value. Physiological not possible for me
     '''
     threshold = 205
     # Remove values above threshold and replace for np.nan

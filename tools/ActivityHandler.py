@@ -54,10 +54,12 @@ class ActivityHandler(object):
                     'elapsed_time': str(activity.elapsed_time),
                     'distance': float(activity.distance),
                     'average_speed': float(activity.average_speed),
-                    'average_heartrate': activity.average_heartrate,
+                    'average_heartrate': float(activity.average_heartrate),
                     'max_heartrate': activity.max_heartrate,
                     'has_heartrate': bool(activity.has_heartrate),
-                    'manual': bool(activity.manual)
+                    'manual': bool(activity.manual),
+                    'b_trimp': float((pd.to_timedelta(activity.moving_time) 
+                    / np.timedelta64(1, 'h') * activity.average_heartrate))
                      }
             if entry['manual'] == False:
                 df = df.append(entry, ignore_index=True)
@@ -67,12 +69,12 @@ class ActivityHandler(object):
         types = ['time', 'velocity_smooth', 'heartrate', 'distance', 'moving']
         
         # Initiate features
-        # HR features
+#        # HR features
         df['std_hr'] = np.NaN
-        df['norm_hr'] = np.NaN
+        df['trimp_norm_hr'] = np.NaN
         
         # Speed features
-        df['norm_speed'] = np.NaN
+        df['trimp_norm_distance'] = np.NaN
         df['std_speed'] = np.NaN
         
         # Loop and calculate features
@@ -85,12 +87,12 @@ class ActivityHandler(object):
                 
                 # ADD FEATURES HERE
                 # HR features
-                df['norm_hr'][i] = feat.norm_hr(streams)
+                df['trimp_norm_hr'][i] = feat.trimp_norm_hr(streams)
                 df['std_hr'][i] = feat.std_hr(streams)
                 
                 # Speed features
                 df['std_speed'][i] = feat.std_speed(streams)
-                df['norm_speed'][i] = feat.norm_speed(streams)
+                df['trimp_norm_distance'][i] = feat.trimp_norm_distance(streams)
                 
             if df['type'][i] != 'Run' and df['has_heartrate'][i] == True:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
@@ -98,7 +100,7 @@ class ActivityHandler(object):
                 streams = feat.correct_hr(streams)
                 
                 # Add HR features here
-                df['norm_hr'][i] = np.mean(np.power(streams['heartrate'].data,4))**(1/4)
+                df['trimp_norm_hr'][i] = feat.trimp_norm_hr(streams)
                 df['std_hr'][i] = feat.std_hr(streams)
                 
             if df['type'][i] == 'Run' and df['has_heartrate'][i] == False:
@@ -106,7 +108,8 @@ class ActivityHandler(object):
                 self.__ApiLimitCounter += 1  # add one for each activity stream
                 
                 # Add features here
-                df['norm_speed'][i] = np.mean(np.power(streams['velocity_smooth'].data,4))**(1/4)
+                df['std_speed'][i] = feat.std_speed(streams)
+                df['trimp_norm_distance'][i] = feat.trimp_norm_distance(streams)
 
             if self.__ApiLimitCounter > 595:
                 self.__waitAPIlimits()
@@ -142,6 +145,7 @@ class ActivityHandler(object):
         activities = self.__api.get_activities(limit=10)
         df = self.__ActivityHandler(activities)
         df = self.__getFeatures(df)
+        # df = self.__calcTrimps(df)
         print('resulted in datafile with %i activities' % len(df))
         self.__savefile(df)
 
