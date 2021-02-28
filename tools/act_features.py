@@ -58,7 +58,7 @@ def lucia_trimp(streams, thresholds=[175, 185]):
     hr_zones = np.where((hr_zones >= thresholds[0]) & (hr_zones < thresholds[1]), 2, hr_zones)
     hr_zones = np.where(hr_zones >= thresholds[1], 3, hr_zones)
     
-    edwards_trimp = sum(hr_zones[1:]*np.diff(streams['time'].data))/60
+    lucia_trimp = sum(hr_zones[1:]*np.diff(streams['time'].data))/60
 
     return lucia_trimp
 
@@ -110,6 +110,23 @@ def std_speed(streams):
     std_speed = np.std(np.array(streams['velocity_smooth'].data)[i])
     
     return std_speed
+
+def lucia_trimp_speed(streams, thresholds=[12, 16]):
+    '''
+    SPEED is corrected for arbitarary zones (km/h) (<12= 1, 12-16 = 2, >16 = 3))
+    Then, the time spend in each zone is multiplied by the zone number.
+    '''   
+    # Calculate HR IF moving
+    v_zones = streams['velocity_smooth'].data*np.array(streams['moving'].data)*3.6
+    
+    # Replace value for the zone
+    v_zones = np.where(v_zones < thresholds[0], 1, v_zones)
+    v_zones = np.where((v_zones >= thresholds[0]) & (v_zones < thresholds[1]), 2, v_zones)
+    v_zones = np.where(v_zones > thresholds[1], 3, v_zones)
+    
+    lucia_trimp_speed = sum(v_zones[1:]*np.diff(streams['time'].data))/60
+
+    return lucia_trimp_speed
 
 def dis_speed(streams, threshold=12, mode='high'):
     '''
