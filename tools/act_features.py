@@ -12,7 +12,7 @@ def trimp_norm_hr(streams):
     hr = [np.int64(i) for i in streams['heartrate'].data[:-1]]
     hr_power = sum((np.diff(streams['time'].data) * np.power(hr,power) *
                streams['moving'].data[:-1]))
-    time = sum(np.diff(streams['time'].data) * streams['moving'].data[:-1])   
+    time = sum(np.diff(streams['time'].data) * streams['moving'].data[1:])   
     norm_hr = (hr_power/time)**(1/power)
     duration_h = sum(np.array(np.diff(streams['time'].data)) * 
                      np.array(streams['moving'].data[1:]))/3600
@@ -32,16 +32,35 @@ def edwards_trimp(streams, hr_max=200):
     z5 = 0.9*hr_max
     
     # Calculate HR IF moving
-    hr = streams['heartrate'].data[:-1]*np.array(streams['moving'].data[:-1])
+    hr_zones = streams['heartrate'].data*np.array(streams['moving'].data)
     
-    # Calculate time per zone
-    z1_values = hr
-    z2_values = np.array([0 if (i < z2 or i >= z3) else i for i in streams['heartrate'].data[:-1]]streams['moving'].data[:-1])
-    z3_values = np.array([0 if (i < z3 or i >= z4) else i for i in streams['heartrate'].data[:-1]]streams['moving'].data[:-1])
-    z4_values = np.array([0 if (i < z4 or i >= z5) else i for i in streams['heartrate'].data[:-1]]streams['moving'].data[:-1])
-    z5_values = np.array([0 if (i < z5) else i for i in streams['heartrate'].data[:-1]]streams['moving'].data[:-1])
+    # Replace value for the zone
+    hr_zones = np.where((hr_zones >= z1) & (hr_zones < z2), 1, hr_zones)
+    hr_zones = np.where((hr_zones >= z2) & (hr_zones < z3), 2, hr_zones)
+    hr_zones = np.where((hr_zones >= z3) & (hr_zones < z4), 3, hr_zones)
+    hr_zones = np.where((hr_zones >= z4) & (hr_zones < z5), 4, hr_zones)
+    hr_zones = np.where(hr_zones >= z5, 5, hr_zones)
+    
+    edwards_trimp = sum(hr_zones[1:]*np.diff(streams['time'].data))/60
 
     return edwards_trimp
+
+def lucia_trimp(streams, thresholds=[175, 185]):
+    '''
+    HR is corrected for zones based on VT (<VT= 1, VT-RCP = 2, >RCP = 3))
+    Then, the time spend in each zone is multiplied by the zone number.
+    '''   
+    # Calculate HR IF moving
+    hr_zones = streams['heartrate'].data*np.array(streams['moving'].data)
+    
+    # Replace value for the zone
+    hr_zones = np.where(hr_zones < thresholds[0], 1, hr_zones)
+    hr_zones = np.where((hr_zones >= thresholds[0]) & (hr_zones < thresholds[1]), 2, hr_zones)
+    hr_zones = np.where(hr_zones >= thresholds[1], 3, hr_zones)
+    
+    edwards_trimp = sum(hr_zones[1:]*np.diff(streams['time'].data))/60
+
+    return lucia_trimp
 
 
 def std_hr(streams):
@@ -68,12 +87,12 @@ def trimp_norm_distance(streams):
     power = 4
     # Convert to int64 for ^4 calculation
     speed_power = sum((np.diff(streams['time'].data) * np.power(streams['velocity_smooth'].data[:-1],power) *
-               streams['moving'].data[:-1]))
+               streams['moving'].data[1:]))
     time = sum(np.diff(streams['time'].data) * streams['moving'].data[:-1])   
     norm_speed = (speed_power/time)**(1/power)
     duration_h = sum(np.array(np.diff(streams['time'].data)) * 
                      np.array(streams['moving'].data[1:]))/3600
-    trimp_norm_distance = norm_speed*duration_h
+    trimp_norm_distance = norm_speed*duration_h*3600
     
     return trimp_norm_distance
 
