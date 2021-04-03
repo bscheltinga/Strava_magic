@@ -8,7 +8,9 @@ Pull your data from Strava and be in control of your own data! The repository is
 - calculate statistics and totals.
 
 **In the future, this script will**
-- Apply models on the training load metrics like the [acute:chronic workload ratio](https://www.scienceforsport.com/acutechronic-workload-ratio/)
+- apply models on the training load metrics like the [acute:chronic workload ratio](https://www.scienceforsport.com/acutechronic-workload-ratio/),
+- apply more statistics
+- create the .KML map more efficiently.
 
 ## Requirements:
 - stravalib
