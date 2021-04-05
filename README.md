@@ -1,37 +1,28 @@
-# Strava2KMLmap
-Create a KML map using the STRAVA API.
+# Strava Magic
+Pull your data from Strava and be in control of your own data! The repository is 100% python based and uses the [stravalib](<https://pythonhosted.org/stravalib/>)
 
-Include libraries:
-stravalib
-pprint
-simplekml
-numpy
-time
-matplotlib
+**Currently, this script let you**
+- save all activities with aggregated data in activities.xlsx,
+- save all training load features of rides **with HR** and **all runs** in activity_features.xlsx,
+- create a .KML map of all activities with GPS data,
+- calculate statistics and totals.
+
+**In the future, this script will**
+- apply models on the training load metrics like the [acute:chronic workload ratio](https://www.scienceforsport.com/acutechronic-workload-ratio/),
+- apply more statistics
+- create the .KML map more efficiently.
+
+## Requirements:
+- stravalib
+- pprint
+- simplekml
+- numpy
+- time
+- matplotlib
 
 Install libraries with:
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
-Flow:
-1. Download all data and save as alldata(.csv?)
-2. Download data since last time and update alldata(.csv?)
-3. Do the things with the alldata file.
-
-NOTE: segment list is not working due to changes in strava api protocol.
-
-To do
-- Alle top 10 segmenten in lijst
-- Segment H-index
-- Kudos/Km correlatie. Meer km's meer kudos?
-- Kudos/foto correlatie
-- Kudos emoji in titel correlatie
-- Totalen km's/uren per sport dit jaar + totaal.
-- H-index + plot
-- Sheet met alle activiteiten + link +data (max HR, TRIMP e.d.)
-- Sheet met alle segment klasseringen
-- Update de KML voor run, ride en gecombineerd.
-- Week samenvatting. Hoe veel uur in welke zones e.d. (via Jonas)
-- Autocorrelation 
-- Correlation score from 1 week.
-- Emoticon usage in title
-- Word usage in title
+## Authors
+- [bscheltinga](https://github.com/bscheltinga)
+- [daangeijs](https://github.com/daangeijs)
