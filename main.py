@@ -1,9 +1,10 @@
 import tools.DataHandler as dh
 import tools.authorization as auth
-import tools.segments2 as seg
+import tools.segments as seg
 import os
 import time
 import json
+import tools.ActivityHandler as ah
 
 if __name__ == '__main__':
     # Check if user_access token is available, otherwise do authorisation first.
@@ -22,7 +23,7 @@ if __name__ == '__main__':
     # Get latest data
     data.sync()
     df = data.get_data()
-
-    # Create segments list data handeler object
-    segments = seg.SegmentsHandler(access_token,'data')
-    segments.sync()
+    
+    acts = ah.ActivityHandler(access_token, 'data')
+    acts.sync()
+    df_acts = acts.get_data()
