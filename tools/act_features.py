@@ -111,7 +111,7 @@ def std_speed(streams):
     
     return std_speed
 
-def lucia_trimp_speed(streams, thresholds=[12, 16]):
+def lucia_trimp_speed(streams, thresholds=[8, 12, 16]):
     '''
     SPEED is corrected for arbitarary zones (km/h) (<12= 1, 12-16 = 2, >16 = 3))
     Then, the time spend in each zone is multiplied by the zone number.
@@ -120,9 +120,9 @@ def lucia_trimp_speed(streams, thresholds=[12, 16]):
     v_zones = streams['velocity_smooth'].data*np.array(streams['moving'].data)*3.6
     
     # Replace value for the zone
-    v_zones = np.where(v_zones < thresholds[0], 1, v_zones)
-    v_zones = np.where((v_zones >= thresholds[0]) & (v_zones < thresholds[1]), 2, v_zones)
-    v_zones = np.where(v_zones > thresholds[1], 3, v_zones)
+    v_zones = np.where((v_zones > thresholds[0]) & (v_zones < thresholds[1]), 1, v_zones)
+    v_zones = np.where((v_zones >= thresholds[1]) & (v_zones < thresholds[2]), 2, v_zones)
+    v_zones = np.where(v_zones > thresholds[2], 3, v_zones)
     
     lucia_trimp_speed = sum(v_zones[1:]*np.diff(streams['time'].data))/60
 
