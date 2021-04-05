@@ -11,35 +11,14 @@ Using df_acts workload parameters as input data.
 
 def create_ff_df(df_acts):
     '''
-    Create a df with every day between first activity and today+15 days.
+    Set the workload parameters from df_acts in ff_df.
+    Set 0 it no activity was done.
     '''
-    ff_df = pd.DataFrame()
-    start = df_acts.index[-1]
-    start = df_acts['start_date'][start]
-    start = datetime.fromtimestamp(start.timestamp())
-    end = datetime.today()
-    days = ((end-start).days)+15 # add some days for future view
-    datelist = pd.date_range(start, periods=days).tolist()
-    ff_df['date'] = datelist
-    
-    return ff_df
+    columns = ['banister_trimp','dis_speed_high','dis_speed_low','distance',
+               'edwards_trimp','moving_time','lucia_trimp','lucia_trimp_speed',
+               'trimp_norm_distance','trimp_norm_hr']
+    ff_df = df_acts.resample('D', on='start_date')[columns].sum()
 
-def trimp_to_ff_df (df_acts,ff_df):
-    '''
-    Set the worklaod parameters from df_acts in ff_df
-    '''
-    # loop over all dates in df
-    # does not work for multiple activities on one day
-    ff_df['b_trimp'] = np.zeros(len(ff_df))
-    j = 0
-    for i in range(len(trimp_df)):
-        flag=True
-        while flag == True:
-            if trimp_df['date'][i].date() == ff_df['date'][j].date():
-                ff_df['b_trimp'][j] = ff_df['b_trimp'][j] + trimp_df['trimp'][i]
-                flag = False
-            else:
-                j += 1                
     return ff_df
 
 def ff_model(ff_df,params, model='trainingspeaks'):
@@ -129,7 +108,8 @@ def make_plot(ff_df):
 model = 'banister'
 params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
 ff_df = create_ff_df(df_acts)
-ff_df = trimp_to_ff_df(trimp_df,ff_df)
-ff_df = ff_model(ff_df, params, model)
-make_plot(ff_df)
-plt.title(model)
+
+#ff_df = trimp_to_ff_df(trimp_df,ff_df)
+#ff_df = ff_model(ff_df, params, model)
+#make_plot(ff_df)
+#plt.title(model)
