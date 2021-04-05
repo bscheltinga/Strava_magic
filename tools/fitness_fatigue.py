@@ -3,25 +3,19 @@ from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-# assuming act. has HR_data
-# b_trimp: implementation of Banister' trimp (avg_hr*duration)
-# other trimp methods could be implemented
-# gains for fitness and fatigue could be implemented
-# delay in fitness response could be implemented.
 
-def b_trimp(df):
-    trimp_df = pd.DataFrame()
-    df = df.loc[df['has_heartrate'] == True]
-    trimp_df['date'] = df['start_date']
-    trimp_df['trimp'] = (df['moving_time'] / np.timedelta64(1, 'h')) * df['average_heartrate']
-    trimp_df = trimp_df.reset_index(drop=True)
-    return trimp_df
+'''
+Using df_acts workload parameters as input data.
 
-def create_ff_df(df):
-    df = df.loc[df['has_heartrate'] == True]
+'''
+
+def create_ff_df(df_acts):
+    '''
+    Create a df with every day between first activity and today+15 days.
+    '''
     ff_df = pd.DataFrame()
-    start = df.index[0]
-    start = df['start_date'][start]
+    start = df_acts.index[-1]
+    start = df_acts['start_date'][start]
     start = datetime.fromtimestamp(start.timestamp())
     end = datetime.today()
     days = ((end-start).days)+15 # add some days for future view
@@ -30,7 +24,10 @@ def create_ff_df(df):
     
     return ff_df
 
-def trimp_to_ff_df (trimp_df,ff_df):
+def trimp_to_ff_df (df_acts,ff_df):
+    '''
+    Set the worklaod parameters from df_acts in ff_df
+    '''
     # loop over all dates in df
     # does not work for multiple activities on one day
     ff_df['b_trimp'] = np.zeros(len(ff_df))
@@ -129,11 +126,10 @@ def make_plot(ff_df):
     plt.subplots_adjust(bottom=0.2)
     plt.legend()
  
-model = 'ACWR'
+model = 'banister'
 params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
-trimp_df = b_trimp(df)
-ff_df = create_ff_df(df)
-ff_df = trimp_to_ff_df (trimp_df,ff_df)
+ff_df = create_ff_df(df_acts)
+ff_df = trimp_to_ff_df(trimp_df,ff_df)
 ff_df = ff_model(ff_df, params, model)
 make_plot(ff_df)
 plt.title(model)
