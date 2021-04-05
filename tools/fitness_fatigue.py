@@ -21,7 +21,7 @@ def create_ff_df(df_acts):
 
     return ff_df
 
-def ff_model(ff_df,params, model='trainingspeaks'):
+def ff_model(ff_df, params, workload='banister_trimp', model='trainingspeaks'):
     '''
     Suported models: banister, trainingspeaks, calvert (not finished), ACWR
     '''
@@ -33,12 +33,12 @@ def ff_model(ff_df,params, model='trainingspeaks'):
         # Model equations according to trainingpeaks/elevate    
         for i in range(len(ff_df)):
             if i == 0:
-                ff_df['fitness'][0] = 0 + (ff_df['b_trimp'][0] - 0)*(1-np.exp(-1/params[0]))
-                ff_df['fatigue'][0] = 0 + (ff_df['b_trimp'][0] - 0)*(1-np.exp(-1/params[1]))
+                ff_df['fitness'][0] = 0 + (ff_df[workload][0] - 0)*(1-np.exp(-1/params[0]))
+                ff_df['fatigue'][0] = 0 + (ff_df[workload][0] - 0)*(1-np.exp(-1/params[1]))
                 ff_df['form'][0] = 0
             else:
-                ff_df['fitness'][i] = ff_df['fitness'][i-1] + (ff_df['b_trimp'][i] - ff_df['fitness'][i-1])*(1-np.exp(-1/params[0]))
-                ff_df['fatigue'][i] = ff_df['fatigue'][i-1] + (ff_df['b_trimp'][i] - ff_df['fatigue'][i-1])*(1-np.exp(-1/params[1]))
+                ff_df['fitness'][i] = ff_df['fitness'][i-1] + (ff_df[workload][i] - ff_df['fitness'][i-1])*(1-np.exp(-1/params[0]))
+                ff_df['fatigue'][i] = ff_df['fatigue'][i-1] + (ff_df[workload][i] - ff_df['fatigue'][i-1])*(1-np.exp(-1/params[1]))
                 ff_df['form'][i] = ff_df['fitness'][i-1] - ff_df['fatigue'][i-1]
             
     if model == 'banister':
@@ -47,12 +47,12 @@ def ff_model(ff_df,params, model='trainingspeaks'):
     # fitness/fatigue = Value yesterday*exp(param) + workload
         for i in range(len(ff_df)):
             if i == 0:
-                ff_df['fitness'][0] = 0 + (ff_df['b_trimp'][0])
-                ff_df['fatigue'][0] = 0 + (ff_df['b_trimp'][0])
+                ff_df['fitness'][0] = 0 + (ff_df[workload][0])
+                ff_df['fatigue'][0] = 0 + (ff_df[workload][0])
                 ff_df['form'][0] = 0
             else:
-                ff_df['fitness'][i] = ff_df['fitness'][i-1]*(np.exp(-1/params[0])) + ff_df['b_trimp'][i]
-                ff_df['fatigue'][i] = ff_df['fatigue'][i-1]*(np.exp(-1/params[1])) + ff_df['b_trimp'][i]
+                ff_df['fitness'][i] = ff_df['fitness'][i-1]*(np.exp(-1/params[0])) + ff_df[workload][i]
+                ff_df['fatigue'][i] = ff_df['fatigue'][i-1]*(np.exp(-1/params[1])) + ff_df[workload][i]
                 ff_df['form'][i] = ff_df['fitness'][i-1] - ff_df['fatigue'][i-1]
                 
     if model == 'calvert':
@@ -61,12 +61,12 @@ def ff_model(ff_df,params, model='trainingspeaks'):
     # fitness/fatigue = Value yesterday*exp(param) + workload (+ extra delay for fitness)
         for i in range(len(ff_df)):
             if i == 0:
-                ff_df['fitness'][0] = 0 + (ff_df['b_trimp'][0])
-                ff_df['fatigue'][0] = 0 + (ff_df['b_trimp'][0])
+                ff_df['fitness'][0] = 0 + (ff_df[workload][0])
+                ff_df['fatigue'][0] = 0 + (ff_df[workload][0])
                 ff_df['form'][0] = 0
             else:
-                ff_df['fitness'][i] = ff_df['fitness'][i-1]*(np.exp(-1/params[0]) - np.exp(-1/3)) + ff_df['b_trimp'][i]
-                ff_df['fatigue'][i] = ff_df['fatigue'][i-1]*(np.exp(-1/params[1])) + ff_df['b_trimp'][i]
+                ff_df['fitness'][i] = ff_df['fitness'][i-1]*(np.exp(-1/params[0]) - np.exp(-1/3)) + ff_df[workload][i]
+                ff_df['fatigue'][i] = ff_df['fatigue'][i-1]*(np.exp(-1/params[1])) + ff_df[workload][i]
                 ff_df['form'][i] = ff_df['fitness'][i-1] - ff_df['fatigue'][i-1]
                 
     if model == 'ACWR':
@@ -75,14 +75,14 @@ def ff_model(ff_df,params, model='trainingspeaks'):
         # it uses a rectangular window for the summation.
         for i in range(len(ff_df)):
             if i <= params[0] and i <= params[1]:
-                ff_df['fitness'][i] = sum(ff_df['b_trimp'][0:i])
-                ff_df['fatigue'][i] = sum(ff_df['b_trimp'][0:i])
+                ff_df['fitness'][i] = sum(ff_df[workload][0:i])
+                ff_df['fatigue'][i] = sum(ff_df[workload][0:i])
             elif i <= params[0] and i > params[1]:
-                ff_df['fitness'][i] = sum(ff_df['b_trimp'][0:i])
-                ff_df['fatigue'][i] = sum(ff_df['b_trimp'][i-params[1]:i])
+                ff_df['fitness'][i] = sum(ff_df[workload][0:i])
+                ff_df['fatigue'][i] = sum(ff_df[workload][i-params[1]:i])
             else:
-                ff_df['fitness'][i] = sum(ff_df['b_trimp'][i-params[0]:i])
-                ff_df['fatigue'][i] = sum(ff_df['b_trimp'][i-params[1]:i])
+                ff_df['fitness'][i] = sum(ff_df[workload][i-params[0]:i])
+                ff_df['fatigue'][i] = sum(ff_df[workload][i-params[1]:i])
             
             if i == 0:
                 ff_df['form'][i] = 0
@@ -95,21 +95,20 @@ def make_plot(ff_df):
     # Plot trimp over time
     plt.figure()
 #    plt.plot(ff_df['date'], ff_df['b_trimp'],label='Banister TRIMP')
-    plt.plot(ff_df['date'], ff_df['fatigue'],label='Fatigue')
-    plt.plot(ff_df['date'], ff_df['fitness'],label='Fitness')
-    plt.plot(ff_df['date'], ff_df['form'],label='Form')
-    plt.hlines(0, ff_df['date'].loc[0], ff_df['date'].iloc[-1], linestyles='dashed')
-    plt.vlines(ff_df['date'].iloc[-14],-500,500, linestyles='dashed')
+    plt.plot(ff_df.index, ff_df['fatigue'],label='Fatigue')
+    plt.plot(ff_df.index, ff_df['fitness'],label='Fitness')
+    plt.plot(ff_df.index, ff_df['form'],label='Form')
+#    plt.hlines(0, ff_df.index.loc[0], ff_df['date'].iloc[-1], linestyles='dashed')
+#    plt.vlines(ff_df['Index'].iloc[-14],-500,500, linestyles='dashed')
     plt.title('Fitness-Fatigue model')
     plt.xticks(rotation=45)
     plt.subplots_adjust(bottom=0.2)
     plt.legend()
  
 model = 'banister'
+workload = 'dis_speed_high'
 params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
 ff_df = create_ff_df(df_acts)
-
-#ff_df = trimp_to_ff_df(trimp_df,ff_df)
-#ff_df = ff_model(ff_df, params, model)
-#make_plot(ff_df)
+ff_df = ff_model(ff_df, params, workload, model)
+make_plot(ff_df)
 #plt.title(model)
