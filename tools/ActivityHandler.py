@@ -26,7 +26,7 @@ class ActivityHandler(object):
     def __waitAPIlimits(self):
         LimitFlag = 1
         self.__ApiLimitCounter = 0
-        print('Waiting for STRAVA API limits.')
+        print('Waiting for STRAVA API limits...')
         while LimitFlag == 1:
             time.sleep(15)  # Wait 15 seconds
             checktime = time.localtime()
@@ -92,24 +92,24 @@ class ActivityHandler(object):
                     'lucia_trimp_speed': float(feat.lucia_trimp_speed(streams))
                     }
                 
-            if df['type'][i] != 'Run' and df['has_heartrate'][i] == True:
-                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
-                self.__ApiLimitCounter += 1  # add one for each activity stream
-                streams = feat.correct_hr(streams)
-                
-                # Add HR features here
-                entry = {
-                    'trimp_norm_hr': float(feat.trimp_norm_hr(streams)),
-                    'std_hr': float(feat.trimp_norm_hr(streams)),
-                    'edwards_trimp': float(feat.edwards_trimp(streams)),
-                    'lucia_trimp': float(feat.lucia_trimp(streams)),
-                    'banister_trimp': float((df['moving_time'][i] / np.timedelta64(1, 'h')) * df['average_heartrate'][i]),
-                    'trimp_norm_distance': np.nan,
-                    'std_speed': np.nan,
-                    'dis_speed_high': np.nan,
-                    'dis_speed_low': np.nan,
-                    'lucia_trimp_speed': np.nan
-                    }
+#            if df['type'][i] != 'Run' and df['has_heartrate'][i] == True:
+#                streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
+#                self.__ApiLimitCounter += 1  # add one for each activity stream
+#                streams = feat.correct_hr(streams)
+#                
+#                # Add HR features here
+#                entry = {
+#                    'trimp_norm_hr': float(feat.trimp_norm_hr(streams)),
+#                    'std_hr': float(feat.trimp_norm_hr(streams)),
+#                    'edwards_trimp': float(feat.edwards_trimp(streams)),
+#                    'lucia_trimp': float(feat.lucia_trimp(streams)),
+#                    'banister_trimp': float((df['moving_time'][i] / np.timedelta64(1, 'h')) * df['average_heartrate'][i]),
+#                    'trimp_norm_distance': np.nan,
+#                    'std_speed': np.nan,
+#                    'dis_speed_high': np.nan,
+#                    'dis_speed_low': np.nan,
+#                    'lucia_trimp_speed': np.nan
+#                    }
                 
             if df['type'][i] == 'Run' and df['has_heartrate'][i] == False:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
