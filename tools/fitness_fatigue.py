@@ -11,8 +11,14 @@ Using df_acts workload parameters as input data.
 
 def create_ff_df(df_acts):
     '''
-    Set the workload parameters from df_acts in ff_df.
-    Set 0 it no activity was done.
+    - Set the workload parameters from df_acts in ff_df.
+    - Set 0 it no activity was done.
+    - Sum the values for multiple activities on one day.
+    
+    Input: pandas.dataframe with workloads per activity date.
+    
+    Output: pandas.dataframe with days since first upload and aggregated
+            workload per day.
     '''
     columns = ['banister_trimp','dis_speed_high','dis_speed_low','distance',
                'edwards_trimp','moving_time','lucia_trimp','lucia_trimp_speed',
@@ -75,13 +81,13 @@ def ff_model(ff_df, params, workload='banister_trimp', model='trainingspeaks'):
         # it uses a rectangular window for the summation.
         for i in range(len(ff_df)):
             if i <= params[0] and i <= params[1]:
-                ff_df['fitness'][i] = sum(ff_df[workload][0:i])
+                ff_df['fitness'][i] = sum(ff_df[workload][0:i])/4
                 ff_df['fatigue'][i] = sum(ff_df[workload][0:i])
             elif i <= params[0] and i > params[1]:
-                ff_df['fitness'][i] = sum(ff_df[workload][0:i])
+                ff_df['fitness'][i] = sum(ff_df[workload][0:i])/4
                 ff_df['fatigue'][i] = sum(ff_df[workload][i-params[1]:i])
             else:
-                ff_df['fitness'][i] = sum(ff_df[workload][i-params[0]:i])
+                ff_df['fitness'][i] = sum(ff_df[workload][i-params[0]:i])/4
                 ff_df['fatigue'][i] = sum(ff_df[workload][i-params[1]:i])
             
             if i == 0:
@@ -105,9 +111,9 @@ def make_plot(ff_df):
     plt.subplots_adjust(bottom=0.2)
     plt.legend()
  
-model = 'banister'
-workload = 'dis_speed_high'
-params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
+model = 'ACWR'
+workload = 'trimp_norm_distance'
+params = [28, 7] # [fitness, fatigue], [42, 7] as starting point
 ff_df = create_ff_df(df_acts)
 ff_df = ff_model(ff_df, params, workload, model)
 make_plot(ff_df)
