@@ -154,18 +154,20 @@ class ActivityHandler(object):
         latest = pd.to_datetime(df['start_date']).max()
         activities = self.__api.get_activities(after=latest)
         df_new = self.__ActivityHandler(activities)
-        df_new = self.__setdatatypes(df_new)
-        df_new = self.__getFeatures(df_new)
-        print('resulted in datafile with %i new activities' % (len(df_new)))
         if len(df_new) > 0:
+            df_new = self.__setdatatypes(df_new)
+            df_new = self.__getFeatures(df_new)
+            print('resulted in datafile with %i new activities' % (len(df_new)))
             df_new.index = reversed(range(len(df_new)))
             df_new = df_new.iloc[::-1]
             df = pd.concat([df_new, df], sort=True)
             self.__savefile(df)
+        else:
+            print('resulted in datafile with 0 new activities')
 
     def full_sync(self):
         print('**FULL SYNC ACTIVITY FEATURES LIST**')
-        activities = self.__api.get_activities()
+        activities = self.__api.get_activities(limit=10)
         df = self.__ActivityHandler(activities)
         df= self.__setdatatypes(df)
         df = self.__getFeatures(df)
@@ -175,4 +177,4 @@ class ActivityHandler(object):
 
     def get_data(self):
         df = pd.read_excel(self.__featuresfile)
-        return self.__setdatatypes(df)
+        return df
