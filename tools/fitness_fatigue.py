@@ -27,6 +27,35 @@ def create_ff_df(df_acts):
 
     return ff_df
 
+def trainingspeaks(ff_df, params, workload='distance'):
+    '''
+    Model the trainingspeaks equation on the input workload parameters
+    
+    Input: ff_df : pandas.dataframe with days since first upload and aggregated
+            workload per day.
+            params : model parameters for decay of fitness and fatigue
+            workload : name of the workload variable in ff_df
+            
+            output: ff_df with addition of trainingspeaks_workload
+    '''
+    trainingspeaks_workload = 'trainingspeaks_' + workload
+    
+    ff_df['fitness'] = np.zeros(len(ff_df))
+    ff_df['fatigue'] = np.zeros(len(ff_df))
+    ff_df[trainingspeaks_workload] = np.zeros(len(ff_df))
+    
+    for i in range(len(ff_df)):
+            if i == 0:
+                ff_df['fitness'][0] = 0 + (ff_df[workload][0] - 0)*(1-np.exp(-1/params[0]))
+                ff_df['fatigue'][0] = 0 + (ff_df[workload][0] - 0)*(1-np.exp(-1/params[1]))
+                ff_df[trainingspeaks_workload][0] = 0
+            else:
+                ff_df['fitness'][i] = ff_df['fitness'][i-1] + (ff_df[workload][i] - ff_df['fitness'][i-1])*(1-np.exp(-1/params[0]))
+                ff_df['fatigue'][i] = ff_df['fatigue'][i-1] + (ff_df[workload][i] - ff_df['fatigue'][i-1])*(1-np.exp(-1/params[1]))
+                ff_df[trainingspeaks_workload][i] = ff_df['fitness'][i-1] - ff_df['fatigue'][i-1]
+    
+    return ff_df
+
 def ff_model(ff_df, params, workload='banister_trimp', model='trainingspeaks'):
     '''
     Suported models: banister, trainingspeaks, calvert (not finished), ACWR
@@ -113,7 +142,7 @@ def make_plot(ff_df):
  
 model = 'ACWR'
 workload = 'trimp_norm_distance'
-params = [28, 7] # [fitness, fatigue], [42, 7] as starting point
+params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
 ff_df = create_ff_df(df_acts)
 ff_df = ff_model(ff_df, params, workload, model)
 make_plot(ff_df)
