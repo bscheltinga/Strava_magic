@@ -103,29 +103,29 @@ def ACWR(ff_df, params, workload):
     '''    
     ACWR_workload = 'ACWR_' + workload
     
-    ff_df['fitness'] = np.zeros(len(ff_df))
-    ff_df['fatigue'] = np.zeros(len(ff_df))
+    ff_df['CL'] = np.zeros(len(ff_df))
+    ff_df['AL'] = np.zeros(len(ff_df))
     ff_df[ACWR_workload] = np.zeros(len(ff_df))
 
     for i in range(len(ff_df)):
         if i <= params[0] and i <= params[1]:
-            ff_df['fitness'][i] = sum(ff_df[workload][0:i])
-            ff_df['fatigue'][i] = sum(ff_df[workload][0:i])
+            ff_df['CL'][i] = sum(ff_df[workload][0:i])
+            ff_df['AL'][i] = sum(ff_df[workload][0:i])
             
         elif i <= params[0] and i > params[1]:
-            ff_df['fitness'][i] = sum(ff_df[workload][0:i])
-            ff_df['fatigue'][i] = sum(ff_df[workload][i-params[1]:i])
+            ff_df['CL'][i] = sum(ff_df[workload][0:i])
+            ff_df['AL'][i] = sum(ff_df[workload][i-params[1]:i])
             
         else:
-            ff_df['fitness'][i] = sum(ff_df[workload][i-params[0]:i])
-            ff_df['fatigue'][i] = sum(ff_df[workload][i-params[1]:i])
+            ff_df['CL'][i] = sum(ff_df[workload][i-params[0]:i])/4
+            ff_df['AL'][i] = sum(ff_df[workload][i-params[1]:i])
         
         if i == 0:
             ff_df[ACWR_workload][i] = 0
         else:
-            ff_df[ACWR_workload][i] = ff_df['fatigue'][i-1]/ff_df['fitness'][i-1]
+            ff_df[ACWR_workload][i] = ff_df['AL'][i-1]/ff_df['CL'][i-1]
             
-    return ff_df.drop(['fatigue','fitness'], axis=1)
+    return ff_df.drop(['AL','CL'], axis=1)
     
 def make_plot(ff_df):
     # Plot trimp over time
@@ -142,9 +142,9 @@ def make_plot(ff_df):
     plt.legend()
  
 model = 'ACWR'
-workload = 'trimp_norm_distance'
+workload = 'distance'
 params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
 ff_df = create_ff_df(df_acts)
-ff_df = ff_model(ff_df, params, workload, model)
-make_plot(ff_df)
+ff_df = ACWR(ff_df, params, workload)
+plt.plot(ff_df['ACWR_distance'])
 #plt.title(model)
