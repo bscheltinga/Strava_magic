@@ -71,7 +71,7 @@ class ActivityHandler(object):
         streams['velocity_smooth'].data = [df['average_speed'][i],df['average_speed'][i]]
         
         streams['moving'] = Object()
-        streams['moving'].data = [1, 1]
+        streams['moving'].data = [True, True]
         
         streams['time'] = Object()
         streams['time'].data = [0, df['moving_time'][i].seconds]
@@ -106,7 +106,7 @@ class ActivityHandler(object):
                     'lucia_trimp_speed': float(feat.lucia_trimp_speed(streams))
                     }
                 
-            if df['type'][i] != 'Run' and df['has_heartrate'][i] == True and df['manual']==False:
+            if df['type'][i] != 'Run' and df['has_heartrate'][i] == True and df['manual'][i]==False:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
                 self.__ApiLimitCounter += 1  # add one for each activity stream
                 streams = feat.correct_hr(streams)
@@ -125,7 +125,7 @@ class ActivityHandler(object):
                     'lucia_trimp_speed': np.nan
                     }
                 
-            if df['type'][i] == 'Run' and df['has_heartrate'][i] == False and df['manual']==False:
+            if df['type'][i] == 'Run' and df['has_heartrate'][i] == False and df['manual'][i]==False:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
                 self.__ApiLimitCounter += 1  # add one for each activity stream
                 
@@ -143,10 +143,11 @@ class ActivityHandler(object):
                     'lucia_trimp_speed': float(feat.lucia_trimp_speed(streams))
                     }
                 
-            if df['type'][i] == 'Run' and df['manual'] == True:
+            if df['type'][i] == 'Run' and df['manual'][i] == True:
                 
-            # No streams are available here. So create them by assuming constant speed
-                streams = self.__Imitate_streams(df, i):
+                # No streams are available here. So create them by assuming constant speed
+                # create them artificially
+                streams = self.__Imitate_streams(df, i)
                 
                 # Add features here
                 entry = {
@@ -200,7 +201,7 @@ class ActivityHandler(object):
 
     def full_sync(self):
         print('**FULL SYNC ACTIVITY FEATURES LIST**')
-        activities = self.__api.get_activities(limit=10)
+        activities = self.__api.get_activities(before='2012-12-30')
         df = self.__ActivityHandler(activities)
         df= self.__setdatatypes(df)
         df = self.__getFeatures(df)
