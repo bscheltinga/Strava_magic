@@ -25,5 +25,8 @@ if __name__ == '__main__':
     df = data.get_data()
     
     acts = ah.ActivityHandler(access_token, 'data')
-    acts.sync()
+    acts.sync(force=True)
     df_acts = acts.get_data()
+
+    # Start code specific for Data Science course
+    df_acts = df_acts[df_acts['type']=='Run']
