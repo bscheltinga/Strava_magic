@@ -72,7 +72,7 @@ class ActivityHandler(object):
         # Loop and calculate features
         for i in range(len(df)):
             # Both HR and RUN
-            if df['type'][i] == 'Run' and df['has_heartrate'][i] == True:
+            if df['type'][i] == 'Run' and df['has_heartrate'][i] == True and df['manual']==False:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
                 self.__ApiLimitCounter += 1  # add one for each activity stream
                 streams = feat.correct_hr(streams)
@@ -91,7 +91,7 @@ class ActivityHandler(object):
                     'lucia_trimp_speed': float(feat.lucia_trimp_speed(streams))
                     }
                 
-            if df['type'][i] != 'Run' and df['has_heartrate'][i] == True:
+            if df['type'][i] != 'Run' and df['has_heartrate'][i] == True and df['manual']==False:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
                 self.__ApiLimitCounter += 1  # add one for each activity stream
                 streams = feat.correct_hr(streams)
@@ -110,7 +110,7 @@ class ActivityHandler(object):
                     'lucia_trimp_speed': np.nan
                     }
                 
-            if df['type'][i] == 'Run' and df['has_heartrate'][i] == False:
+            if df['type'][i] == 'Run' and df['has_heartrate'][i] == False and df['manual']==False:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
                 self.__ApiLimitCounter += 1  # add one for each activity stream
                 
@@ -127,6 +127,29 @@ class ActivityHandler(object):
                     'dis_speed_low': float(feat.dis_speed(streams, mode='low')),
                     'lucia_trimp_speed': float(feat.lucia_trimp_speed(streams))
                     }
+                
+                if df['type'][i] == 'Run' and df['manual'] == True:
+                
+                    # No streams are available here. So create them by assuming constant speed
+                    class Object(object):
+                        pass
+                    streams = {}
+                    streams['velocity_smooth'] = Object()
+                    streams['velocity_smooth'].data = [df['average_speed'][i],df['average_speed'][i]]
+                
+                # Add features here
+                entry = {
+                    'trimp_norm_hr': np.nan,
+                    'std_hr': np.nan,
+                    'edwards_trimp': np.nan,
+                    'lucia_trimp': np.nan,
+                    'banister_trimp': np.nan,
+                    'trimp_norm_distance': df['average_speed'][i],
+                    'std_speed': np.nan,
+                    'dis_speed_high': float(feat.dis_speed(streams, mode='high')),
+                    'dis_speed_low': float(feat.dis_speed(streams, mode='low')),
+                    'lucia_trimp_speed': float(feat.lucia_trimp_speed(streams))
+                    }   
             
             df_features = df_features.append(entry, ignore_index=True)
 
@@ -166,7 +189,7 @@ class ActivityHandler(object):
 
     def full_sync(self):
         print('**FULL SYNC ACTIVITY FEATURES LIST**')
-        activities = self.__api.get_activities()
+        activities = self.__api.get_activities(limit=10)
         df = self.__ActivityHandler(activities)
         df= self.__setdatatypes(df)
         df = self.__getFeatures(df)
