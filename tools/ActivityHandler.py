@@ -59,8 +59,7 @@ class ActivityHandler(object):
                     'has_heartrate': bool(activity.has_heartrate),
                     'manual': bool(activity.manual)
                     }
-            if (entry['manual'] == False and (entry['has_heartrate'] == True or
-                    entry['type'] == 'Run')):
+            if (entry['has_heartrate'] == True or entry['type'] == 'Run'):
                 df = df.append(entry, ignore_index=True)
         return df
     
