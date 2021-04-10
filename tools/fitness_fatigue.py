@@ -6,7 +6,6 @@ import numpy as np
 
 '''
 Using df_acts workload parameters as input data.
-
 '''
 
 def create_ff_df(df_acts):
@@ -125,7 +124,7 @@ def ACWR(ff_df, params, workload):
         else:
             ff_df[ACWR_workload][i] = ff_df['AL'][i-1]/ff_df['CL'][i-1]
             
-    return ff_df.drop(['AL','CL'], axis=1)
+    return ff_df # ff_df.drop(['AL','CL'], axis=1)
     
 def make_plot(ff_df):
     # Plot trimp over time
@@ -141,10 +140,13 @@ def make_plot(ff_df):
     plt.subplots_adjust(bottom=0.2)
     plt.legend()
  
-model = 'ACWR'
+model = 'trainingspeaks'
 workload = 'distance'
 params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
 ff_df = create_ff_df(df_acts)
-ff_df = ACWR(ff_df, params, workload)
-plt.plot(ff_df['ACWR_distance'])
+ff_df = trainingspeaks(ff_df, params, 'distance')
+
+plt.plot(ff_df['trainingspeaks_distance'])
+plt.xticks(rotation=45)
+plt.subplots_adjust(bottom=0.2)
 #plt.title(model)
