@@ -167,7 +167,7 @@ class ActivityHandler(object):
 
     def full_sync(self):
         print('**FULL SYNC ACTIVITY FEATURES LIST**')
-        activities = self.__api.get_activities(limit=10)
+        activities = self.__api.get_activities()
         df = self.__ActivityHandler(activities)
         df= self.__setdatatypes(df)
         df = self.__getFeatures(df)
