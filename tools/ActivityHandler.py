@@ -63,6 +63,21 @@ class ActivityHandler(object):
                 df = df.append(entry, ignore_index=True)
         return df
     
+    def __Imitate_streams(self, df, i):
+        class Object(object):
+            pass
+        streams = {}
+        streams['velocity_smooth'] = Object()
+        streams['velocity_smooth'].data = [df['average_speed'][i],df['average_speed'][i]]
+        
+        streams['moving'] = Object()
+        streams['moving'].data = [1, 1]
+        
+        streams['time'] = Object()
+        streams['time'].data = [0, df['moving_time'][i].seconds]
+
+        return streams
+    
     def __getFeatures(self, df):
         types = ['time', 'velocity_smooth', 'heartrate', 'distance', 'moving']
         
@@ -128,14 +143,10 @@ class ActivityHandler(object):
                     'lucia_trimp_speed': float(feat.lucia_trimp_speed(streams))
                     }
                 
-                if df['type'][i] == 'Run' and df['manual'] == True:
+            if df['type'][i] == 'Run' and df['manual'] == True:
                 
-                    # No streams are available here. So create them by assuming constant speed
-                    class Object(object):
-                        pass
-                    streams = {}
-                    streams['velocity_smooth'] = Object()
-                    streams['velocity_smooth'].data = [df['average_speed'][i],df['average_speed'][i]]
+            # No streams are available here. So create them by assuming constant speed
+                streams = self.__Imitate_streams(df, i):
                 
                 # Add features here
                 entry = {
@@ -144,7 +155,7 @@ class ActivityHandler(object):
                     'edwards_trimp': np.nan,
                     'lucia_trimp': np.nan,
                     'banister_trimp': np.nan,
-                    'trimp_norm_distance': df['average_speed'][i],
+                    'trimp_norm_distance': float(feat.trimp_norm_distance(streams)),
                     'std_speed': np.nan,
                     'dis_speed_high': float(feat.dis_speed(streams, mode='high')),
                     'dis_speed_low': float(feat.dis_speed(streams, mode='low')),
