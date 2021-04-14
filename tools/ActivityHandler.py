@@ -87,7 +87,7 @@ class ActivityHandler(object):
         # Loop and calculate features
         for i in range(len(df)):
             # Both HR and RUN
-            if df['type'][i] == 'Run' and df['has_heartrate'][i] == True and df['manual']==False:
+            if df['type'][i] == 'Run' and df['has_heartrate'][i] == True and df['manual'][i]==False:
                 streams = self.__api.get_activity_streams(int(df['id'][i]), types=types)
                 self.__ApiLimitCounter += 1  # add one for each activity stream
                 streams = feat.correct_hr(streams)
@@ -201,7 +201,7 @@ class ActivityHandler(object):
 
     def full_sync(self):
         print('**FULL SYNC ACTIVITY FEATURES LIST**')
-        activities = self.__api.get_activities(before='2012-12-30')
+        activities = self.__api.get_activities()
         df = self.__ActivityHandler(activities)
         df= self.__setdatatypes(df)
         df = self.__getFeatures(df)
