@@ -164,7 +164,7 @@ workloads = ['moving_time','distance','lucia_trimp_speed','dis_speed_high','dis_
  
 ff_df = create_ff_df(df_acts)
 params_ACWR = [28, 7]
-params_tp = [7, 42]
+params_tp = [42, 7]
 params_AL = [7]
 
 for WL in workloads:
