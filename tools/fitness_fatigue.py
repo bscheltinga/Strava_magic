@@ -139,8 +139,6 @@ def AL(ff_df, params, workload):
     '''    
     AL_workload = 'AL_' + workload
     
-    ff_df['CL'] = np.zeros(len(ff_df))
-    ff_df['AL'] = np.zeros(len(ff_df))
     ff_df[AL_workload] = np.zeros(len(ff_df))
 
     for i in range(len(ff_df)):
@@ -169,12 +167,20 @@ def make_plot(ff_df):
     plt.xticks(rotation=45)
     plt.subplots_adjust(bottom=0.2)
     plt.legend()
+    
+workloads = ['moving_time','distance','lucia_trimp_speed','dis_speed_high','dis_speed_low','trimp_norm_distance']
+
  
-model = 'ACWR'
-workload = 'distance'
-params = [28, 7] # [fitness, fatigue], [42, 7] as starting point
 ff_df = create_ff_df(df_acts)
-ff_df = ACWR(ff_df, params, 'distance')
+params_ACWR = [7, 28]
+params_tp = [7, 42]
+params_AL = [7]
+
+for WL in workloads:
+    ff_df = ACWR(ff_df, params_ACWR, WL)
+    ff_df = trainingspeaks(ff_df, params_tp, WL)
+    ff_df = AL(ff_df, params_AL, WL)
+
 
 # plt.plot(ff_df['ACWR_distance'])
 # plt.xticks(rotation=45)
