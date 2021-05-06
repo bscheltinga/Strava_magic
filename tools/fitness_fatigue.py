@@ -104,25 +104,16 @@ def ACWR(ff_df, params, workload):
     
     ff_df['CL'] = np.zeros(len(ff_df))
     ff_df['AL'] = np.zeros(len(ff_df))
-    ff_df[ACWR_workload] = np.zeros(len(ff_df))
+    ff_df[ACWR_workload] = np.full([len(ff_df), 1], np.nan)
 
     for i in range(len(ff_df)):
-        if i <= params[0] and i <= params[1]:
-            ff_df['CL'][i] = sum(ff_df[workload][0:i])
-            ff_df['AL'][i] = sum(ff_df[workload][0:i])
-            
-        elif i <= params[0] and i > params[1]:
-            ff_df['CL'][i] = sum(ff_df[workload][0:i])
-            ff_df['AL'][i] = sum(ff_df[workload][i-params[1]:i])
-            
-        else:
+        if i > params[0]: # Only if there is a full chronic workload
             ff_df['CL'][i] = sum(ff_df[workload][i-params[0]:i])/4
             ff_df['AL'][i] = sum(ff_df[workload][i-params[1]:i])
         
-        if i == 0:
-            ff_df[ACWR_workload][i] = 0
-        else:
-            ff_df[ACWR_workload][i] = ff_df['AL'][i-1]/ff_df['CL'][i-1]
+
+            if ff_df['CL'][i] != 0:
+                ff_df[ACWR_workload][i] = ff_df['AL'][i-1]/ff_df['CL'][i-1]
             
     return ff_df.drop(['AL','CL'], axis=1)
 
@@ -172,7 +163,7 @@ workloads = ['moving_time','distance','lucia_trimp_speed','dis_speed_high','dis_
 
  
 ff_df = create_ff_df(df_acts)
-params_ACWR = [7, 28]
+params_ACWR = [28, 7]
 params_tp = [7, 42]
 params_AL = [7]
 
