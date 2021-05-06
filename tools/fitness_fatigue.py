@@ -124,7 +124,37 @@ def ACWR(ff_df, params, workload):
         else:
             ff_df[ACWR_workload][i] = ff_df['AL'][i-1]/ff_df['CL'][i-1]
             
-    return ff_df # ff_df.drop(['AL','CL'], axis=1)
+    return ff_df.drop(['AL','CL'], axis=1)
+
+def AL(ff_df, params, workload):
+    '''
+    Model the acute load
+    
+    Input: ff_df : pandas.dataframe with days since first upload and aggregated
+            workload per day.
+            params : model parameters number of days of acute load
+            workload : name of the workload variable in ff_df
+            
+    output: ff_df with addition of al_workload
+    '''    
+    AL_workload = 'AL_' + workload
+    
+    ff_df['CL'] = np.zeros(len(ff_df))
+    ff_df['AL'] = np.zeros(len(ff_df))
+    ff_df[AL_workload] = np.zeros(len(ff_df))
+
+    for i in range(len(ff_df)):
+        if i <= params[0] and i <= params[0]:
+            ff_df[AL_workload][i] = sum(ff_df[workload][0:i])
+            
+        elif i <= params[0] and i > params[0]:
+            ff_df[AL_workload][i] = sum(ff_df[workload][i-params[0]:i])
+            
+        else:
+            ff_df[AL_workload][i] = sum(ff_df[workload][i-params[0]:i])
+        
+            
+    return ff_df
     
 def make_plot(ff_df):
     # Plot trimp over time
@@ -140,13 +170,13 @@ def make_plot(ff_df):
     plt.subplots_adjust(bottom=0.2)
     plt.legend()
  
-model = 'trainingspeaks'
+model = 'ACWR'
 workload = 'distance'
-params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
+params = [28, 7] # [fitness, fatigue], [42, 7] as starting point
 ff_df = create_ff_df(df_acts)
-ff_df = trainingspeaks(ff_df, params, 'distance')
+ff_df = ACWR(ff_df, params, 'distance')
 
-plt.plot(ff_df['trainingspeaks_distance'])
-plt.xticks(rotation=45)
-plt.subplots_adjust(bottom=0.2)
-#plt.title(model)
+# plt.plot(ff_df['ACWR_distance'])
+# plt.xticks(rotation=45)
+# plt.subplots_adjust(bottom=0.2)
+# #plt.title(model)
