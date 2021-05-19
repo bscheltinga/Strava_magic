@@ -160,19 +160,21 @@ def make_plot(ff_df):
     plt.legend()
     
 workloads = ['moving_time','distance','lucia_trimp_speed','dis_speed_high','dis_speed_low','trimp_norm_distance']
-
- 
 ff_df = create_ff_df(df_acts)
 params_ACWR = [28, 7]
 params_tp = [42, 7]
 params_AL = [7]
+
+# Remove all unused columns (leave the columns in workloads array)
+ff_df.drop(ff_df.columns.difference(workloads), 1, inplace=True)
 
 for WL in workloads:
     ff_df = ACWR(ff_df, params_ACWR, WL)
     ff_df = trainingspeaks(ff_df, params_tp, WL)
     ff_df = AL(ff_df, params_AL, WL)
 
-
+# Save it to a excel
+ff_df.to_excel(r'data/Data_science_workload_and_workloadmodels.xlsx')
 # plt.plot(ff_df['ACWR_distance'])
 # plt.xticks(rotation=45)
 # plt.subplots_adjust(bottom=0.2)
