@@ -38,6 +38,12 @@ for mdl in models:
         t_stats.append(t_stat)
         p_vals.append(p_val)
         
+        plt.figure();
+        plt.hist(df_non_injur[param],bins=25, label='Non Injured')
+        plt.hist(df_injur[param],bins=25, label='Inured')
+        plt.legend()
+                 
+        
 # Make dataframe
 df = pd.DataFrame()
 df['Model'] = param_list
