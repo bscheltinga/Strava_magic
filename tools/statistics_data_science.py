@@ -45,3 +45,5 @@ df['Mean non-injured'] = mean_non_injur
 df['Mean injured'] = mean_injur
 df['t-stats'] = t_stats
 df['p-value'] = p_vals
+
+df.to_excel(r'C:\Users\bscheltinga\OneDrive - Universiteit Twente\Data Science\Project\Tabellen\statistics.xlsx')
