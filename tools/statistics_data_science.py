@@ -42,6 +42,7 @@ for mdl in models:
         plt.hist(df_non_injur[param],bins=25, label='Non Injured')
         plt.hist(df_injur[param],bins=25, label='Inured')
         plt.legend()
+        plt.title('Histograms ' + param)
                  
         
 # Make dataframe
@@ -52,4 +53,4 @@ df['Mean injured'] = mean_injur
 df['t-stats'] = t_stats
 df['p-value'] = p_vals
 
-df.to_excel(r'C:\Users\bscheltinga\OneDrive - Universiteit Twente\Data Science\Project\Tabellen\statistics.xlsx')
+# df.to_excel(r'C:\Users\bscheltinga\OneDrive - Universiteit Twente\Data Science\Project\Tabellen\statistics.xlsx')
