@@ -13,24 +13,34 @@ import pandas as pd
 from stravalib import Client
 import time
 
-    def Get_streams(ID):
-        return streams
+def get_streams(ID):
+    df_act = pd.DataFrame()  # Create the dataframe to store data
+        
+    # Define types of data and get streams
+    types = ['time', 'distance', 'altitude', 'velocity_smooth',
+             'heartrate', 'cadence', 'watts', 'temp', 'moving',
+             'grade_smooth']
+    streams = api.get_activity_streams(ID, types=types)    
+    keys = list(streams.keys())  # List available data
+    for key in keys:
+        df_act[key] = streams[key].data
+    return df_act
 
 
-    def Save_xlsx(streams, title, folder):
+def save_xlsx(streams, title, folder):
 
     
-    def Wait_API_limits():
-        LimitFlag = 1
-        print('Waiting for STRAVA API limits...')
-        while LimitFlag == 1:
-            time.sleep(15)  # Wait 15 seconds
-            checktime = time.localtime()
-            if checktime.tm_min % 15 == 0:
-                print('Continuing syncing')
-                LimitFlag = 0
-        ApiLimitCounter = 0
-        return ApiLimitCounter
+def wait_API_limits():
+    LimitFlag = 1
+    print('Waiting for STRAVA API limits...')
+    while LimitFlag == 1:
+        time.sleep(15)  # Wait 15 seconds
+        checktime = time.localtime()
+        if checktime.tm_min % 15 == 0:
+            print('Continuing syncing')
+            LimitFlag = 0
+    ApiLimitCounter = 0
+    return ApiLimitCounter
 
 # Set constants
 ApiLimitCounter = 5
@@ -47,7 +57,7 @@ for ID in df['id']:
     print(ID)
     
     # Get streams
-    
+    df_act = get_streams(ID)
     # Save as xlsx
     
     # Increase API counter and check for limits
