@@ -23,7 +23,3 @@ if __name__ == '__main__':
     # Get latest data
     data.sync()
     df = data.get_data()
-    
-    acts = ah.ActivityHandler(access_token, 'data')
-    acts.sync()
-    df_acts = acts.get_data()
