@@ -11,11 +11,29 @@ all original data except for GPS-data. Sampling rate is the original rate.
 
 import pandas as pd
 from stravalib import Client
+import time
 
-def Get_streams(ID):
-    return streams
+    def Get_streams(ID):
+        return streams
 
-def Save_xlsx(streams, title, folder):
+
+    def Save_xlsx(streams, title, folder):
+
+    
+    def Wait_API_limits():
+        LimitFlag = 1
+        print('Waiting for STRAVA API limits...')
+        while LimitFlag == 1:
+            time.sleep(15)  # Wait 15 seconds
+            checktime = time.localtime()
+            if checktime.tm_min % 15 == 0:
+                print('Continuing syncing')
+                LimitFlag = 0
+        ApiLimitCounter = 0
+        return ApiLimitCounter
+
+# Set constants
+ApiLimitCounter = 5
 
 # List all activities
 df = pd.read_excel('data/activities.xlsx')
@@ -28,6 +46,11 @@ api = Client(access_token=access_token)
 for ID in df['id']:
     print(ID)
     
-# Get streams
-
-# Export as .xlsx
+    # Get streams
+    
+    # Save as xlsx
+    
+    # Increase API counter and check for limits
+    ApiLimitCounter+=1
+    if ApiLimitCounter > 495:
+        ApiLimitCounter = Wait_API_limits()
