@@ -21,7 +21,9 @@ workloads = ['moving_time','dis_speed_high','dis_speed_low']
 models = ['AL', 'ACWR', 'trainingspeaks']
 param_list = []
 mean_injur = []
+std_injur = []
 mean_non_injur = []
+std_non_injur = []
 t_stats = []
 p_vals = []
 for mdl in models:
@@ -31,6 +33,9 @@ for mdl in models:
         
         mean_injur.append(np.mean(df_injur[param]))
         mean_non_injur.append(np.mean(df_non_injur[param]))
+        
+        std_injur.append(np.std(df_injur[param]))
+        std_non_injur.append(np.std(df_non_injur[param]))
         
         # Paired sample ttest
         
@@ -49,8 +54,10 @@ for mdl in models:
 df = pd.DataFrame()
 df['Model'] = param_list
 df['Mean non-injured'] = mean_non_injur
+df['Std non-injured'] = std_non_injur
 df['Mean injured'] = mean_injur
+df['Std injured'] = std_injur
 df['t-stats'] = t_stats
 df['p-value'] = p_vals
 
-# df.to_excel(r'C:\Users\bscheltinga\OneDrive - Universiteit Twente\Data Science\Project\Tabellen\statistics.xlsx')
+df.to_excel(r'C:\Users\bscheltinga\OneDrive - Universiteit Twente\Data Science\Project\Tabellen\statistics.xlsx')

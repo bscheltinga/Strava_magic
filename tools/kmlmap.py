@@ -33,4 +33,4 @@ def create_kml(usertoken, df):
             cords = np.array(streams['latlng'].data)
             cords = np.fliplr(cords)  # Flip the cords for right kml notation
             kml.newlinestring(name=row['name'], coords=cords, extrude=1)
-    kml.save(r"data/KMLmap.kml")
+    kml.save(r"data/KMLmap_run.kml")

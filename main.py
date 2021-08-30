@@ -1,6 +1,7 @@
 import tools.DataHandler as dh
 import tools.authorization as auth
 import tools.segments as seg
+import tools.kmlmap as kmlmap
 import os
 import time
 import json
@@ -25,8 +26,11 @@ if __name__ == '__main__':
     df = data.get_data()
     
     acts = ah.ActivityHandler(access_token, 'data')
-    acts.sync()
+    acts.sync(force=True)
     df_acts = acts.get_data()
 
     # Start code specific for Data Science course
-    df_acts = df_acts[df_acts['type']=='Run']
+    # df_acts = df_acts[df_acts['type']=='Run']
+    # df_acts = df_acts[df_acts['manual']==0]
+    
+    # kmlmap.create_kml(access_token,df_acts)
