@@ -47,17 +47,16 @@ ApiLimitCounter = 5
 datafolder = r"C:\Users\bscheltinga\Documents\Strava_magic\data\anonymized"
 
 # List all activities
-df = pd.read_excel('data/activities.xlsx')
+df = pd.read_excel(r'C:\Users\bscheltinga\Documents\Strava_magic\data\activities.xlsx')
 df = df[df['manual']==False]
 df = df.reset_index(drop=True)
 
 # Connect API - get access_token by running main.py
-api = Client(access_token=access_token)
+access_token = "_"
+api = Client(access_token = access_token)
 
 # Loop over activities
 for i, ID in enumerate(df['id']):
-    print(ID)
-    print(i)
 
     # Get streams
     df_act = get_streams(ID)
