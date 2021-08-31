@@ -70,6 +70,6 @@ for i, ID in enumerate(df['id']):
     # Save as xlsx
     name = df['start_date'][i]
     name = name.replace(" ", "_").replace("-", "_").replace(":", "")
-    name = name + '.xlsx'
+    name = name + "_" + df['type'][i] + '.xlsx'
     folder_name = os.path.join(datafolder, name)
     df_act.to_excel(folder_name, index=False)
