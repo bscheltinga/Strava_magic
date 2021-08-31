@@ -57,6 +57,7 @@ api = Client(access_token = access_token)
 
 # Loop over activities
 for i, ID in enumerate(df['id']):
+    print("Working... %i remaining" % (len(df)-i))
 
     # Get streams
     df_act = get_streams(ID)
