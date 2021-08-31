@@ -13,6 +13,7 @@ import pandas as pd
 from stravalib import Client
 import time
 
+
 def get_streams(ID):
     df_act = pd.DataFrame()  # Create the dataframe to store data
         
@@ -23,7 +24,7 @@ def get_streams(ID):
     streams = api.get_activity_streams(ID, types=types)    
     keys = list(streams.keys())  # List available data
     for key in keys:
-        df_act[key] = streams[key].data
+        df_act[key] = streams[key].data 
     return df_act
 
 
@@ -44,23 +45,30 @@ def wait_API_limits():
 
 # Set constants
 ApiLimitCounter = 5
+datafolder = r"C:\Users\bscheltinga\Documents\Strava_magic\data\anonymized\"
 
 # List all activities
 df = pd.read_excel('data/activities.xlsx')
 df = df[df['manual']==False]
+df = df.reset_index(drop=True)
 
 # Connect API - get access_token by running main.py
 api = Client(access_token=access_token)
 
 # Loop over activities
-for ID in df['id']:
+for i, ID in enumerate(df['id']):
     print(ID)
+    print(i)
     
     # Get streams
     df_act = get_streams(ID)
-    # Save as xlsx
     
     # Increase API counter and check for limits
     ApiLimitCounter+=1
-    if ApiLimitCounter > 495:
+    if ApiLimitCounter > 595:
         ApiLimitCounter = Wait_API_limits()
+        
+    # Save as xlsx
+    name = df['start_date'][i]
+    name = name.replace(" ","_").replace("-","_").replace(":","")
+    df_act.to_excel(, index=False)
