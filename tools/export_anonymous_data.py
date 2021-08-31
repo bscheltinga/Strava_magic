@@ -12,25 +12,23 @@ all original data except for GPS-data. Sampling rate is the original rate.
 import pandas as pd
 from stravalib import Client
 import time
+import os.path
 
 
 def get_streams(ID):
     df_act = pd.DataFrame()  # Create the dataframe to store data
-        
+
     # Define types of data and get streams
     types = ['time', 'distance', 'altitude', 'velocity_smooth',
              'heartrate', 'cadence', 'watts', 'temp', 'moving',
              'grade_smooth']
-    streams = api.get_activity_streams(ID, types=types)    
+    streams = api.get_activity_streams(ID, types=types)
     keys = list(streams.keys())  # List available data
     for key in keys:
-        df_act[key] = streams[key].data 
+        df_act[key] = streams[key].data
     return df_act
 
 
-def save_xlsx(streams, title, folder):
-
-    
 def wait_API_limits():
     LimitFlag = 1
     print('Waiting for STRAVA API limits...')
@@ -43,9 +41,10 @@ def wait_API_limits():
     ApiLimitCounter = 0
     return ApiLimitCounter
 
+
 # Set constants
 ApiLimitCounter = 5
-datafolder = r"C:\Users\bscheltinga\Documents\Strava_magic\data\anonymized\"
+datafolder = r"C:\Users\bscheltinga\Documents\Strava_magic\data\anonymized"
 
 # List all activities
 df = pd.read_excel('data/activities.xlsx')
@@ -59,16 +58,18 @@ api = Client(access_token=access_token)
 for i, ID in enumerate(df['id']):
     print(ID)
     print(i)
-    
+
     # Get streams
     df_act = get_streams(ID)
-    
+
     # Increase API counter and check for limits
-    ApiLimitCounter+=1
+    ApiLimitCounter += 1
     if ApiLimitCounter > 595:
-        ApiLimitCounter = Wait_API_limits()
-        
+        ApiLimitCounter = wait_API_limits()
+
     # Save as xlsx
     name = df['start_date'][i]
-    name = name.replace(" ","_").replace("-","_").replace(":","")
-    df_act.to_excel(, index=False)
+    name = name.replace(" ", "_").replace("-", "_").replace(":", "")
+    name = name + '.xlsx'
+    folder_name = os.path.join(datafolder, name)
+    df_act.to_excel(folder_name, index=False)
