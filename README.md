@@ -1,6 +1,8 @@
 # Strava Magic
 Pull your data from Strava and be in control of your own data! The repository is 100% python based and uses the [stravalib](<https://pythonhosted.org/stravalib/>)
 
+This branch is used to export all non-manual activities on strava as .xlsx files. GPS-coordinates are removed. Other data is maintained at original sampling rate.
+
 **Currently, this script let you**
 - save all activities with aggregated data in activities.xlsx,
 - save all training load features of rides **with HR** and **all runs** in activity_features.xlsx,
