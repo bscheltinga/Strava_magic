@@ -9,7 +9,7 @@ class DataHandler(object):
     def __init__(self, token, datafolder='data'):
         self.__token = token
         self.__datafolder = datafolder
-        self.__activitiesfile = os.path.join(self.__datafolder, 'activities.xlsx')
+        self.__activitiesfile = os.path.join(self.__datafolder, 'activitiesv2.xlsx')
         self.__databaseadress = os.path.join('sqlite:///', self.__datafolder, 'strava.db')
 
         # Setup folders
@@ -45,7 +45,8 @@ class DataHandler(object):
                    'start_date': activity.start_date.strftime('%Y-%m-%d %H:%M:%S'),
                    'athlete_count': int(activity.athlete_count),
                    'gear_name': str(activity.gear_id),
-                   'private': str(activity.private)
+                   'private': str(activity.private),
+                   'Workout_type': activity.workout_type
                    }
         return datarow
 
