@@ -55,8 +55,48 @@ def trainingspeaks(ff_df, params, workload='distance'):
             ff_df['fatigue'][i] = ff_df['fatigue'][i-1] + (ff_df[workload][i] - ff_df['fatigue'][i-1])*(1-np.exp(-1/params[1]))
             ff_df[trainingspeaks_workload][i] = ff_df['fitness'][i-1] - ff_df['fatigue'][i-1]
 
-    # return ff_df
-    return ff_df.drop(['fatigue','fitness'], axis=1)
+    return ff_df
+    # return ff_df.drop(['fatigue','fitness'], axis=1)
+  
+
+def busso(ff_df, params, workload='distance'):
+    '''
+    Model the original banister equation on the input workload parameters
+
+    Model equations according to equation 5/6 from
+    Busso, T., Candau, R., & Lacour, J. (1994). Fatigue and fitness modelled from
+    the effects of training on performance. European Journal of Applied Physiology
+    and Occupational Physiology, 69(1), 50–54. https://doi.org/10.1007/BF00867927    
+    
+    This should be slightly different compared to banister (delay), but this
+    implementation is not working for some reason...
+
+    Input: ff_df : pandas.dataframe with days since first upload and aggregated
+            workload per day.
+            params : model parameters for decay of fitness and fatigue
+            workload : name of the workload variable in ff_df
+
+    output: ff_df with addition of banister_workload
+    '''
+
+    busso_workload = 'busso_' + workload
+
+    ff_df['fitness'] = np.zeros(len(ff_df))
+    ff_df['fatigue'] = np.zeros(len(ff_df))
+    ff_df[busso_workload] = np.zeros(len(ff_df))
+
+    for i in range(len(ff_df)):
+        if i < 2:
+            ff_df['fitness'][0] = 0 + ff_df[workload][0] * np.exp(-1/params[0])
+            ff_df['fatigue'][0] = 0 + ff_df[workload][0] * np.exp(-1/params[1])
+            ff_df[busso_workload][0] = 0
+        else:
+            ff_df['fitness'][i] = (ff_df['fitness'][i-2] + ff_df[workload][i-1]) * np.exp(-1/params[0])
+            ff_df['fatigue'][i] = (ff_df['fatigue'][i-2] + ff_df[workload][i-1]) * np.exp(-1/params[1])
+            ff_df[busso_workload][i] = ff_df['fitness'][i-1] - ff_df['fatigue'][i-1]
+    
+    return ff_df
+    # return ff_df.drop(['fatigue','fitness'], axis=1)
 
 
 def banister(ff_df, params, workload='distance'):
@@ -90,8 +130,9 @@ def banister(ff_df, params, workload='distance'):
             ff_df['fitness'][i] = ff_df['fitness'][i-1]*(np.exp(-1/params[0])) + ff_df[workload][i]
             ff_df['fatigue'][i] = ff_df['fatigue'][i-1]*(np.exp(-1/params[1])) + ff_df[workload][i]
             ff_df[banister_workload][i] = ff_df['fitness'][i-1] - ff_df['fatigue'][i-1]
-            
-    return ff_df.drop(['fatigue', 'fitness'], axis=1)
+     
+    return ff_df
+    # return ff_df.drop(['fatigue', 'fitness'], axis=1)
 
 
 def ACWR(ff_df, params, workload):
@@ -146,11 +187,11 @@ def make_plot(ff_df):
     plt.subplots_adjust(bottom=0.2)
     plt.legend()
 
-model = 'trainingspeaks'
+model = 'banister'
 workload = 'banister_trimp'
 params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
-ff_df = create_ff_df(df_acts)
-ff_df = trainingspeaks(ff_df, params, 'banister_trimp')
+# ff_df = create_ff_df(df_acts)
+ff_df = busso(ff_df, params, 'banister_trimp')
 
 plt.plot(ff_df['trainingspeaks_banister_trimp'])
 plt.xticks(rotation=45)
