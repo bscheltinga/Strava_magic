@@ -227,9 +227,9 @@ def make_plot(ff_df):
     # Plot trimp over time
     plt.figure()
 #    plt.plot(ff_df['date'], ff_df['b_trimp'],label='Banister TRIMP')
-    plt.plot(ff_df.index, ff_df['fatigue'],label='Fatigue')
-    plt.plot(ff_df.index, ff_df['fitness'],label='Fitness')
-    plt.plot(ff_df.index, ff_df['form'],label='Form')
+    plt.plot(ff_df.index, ff_df['fatigue'], label='Fatigue')
+    plt.plot(ff_df.index, ff_df['fitness'], label='Fitness')
+    plt.plot(ff_df.index, ff_df['form'], label='Form')
 #    plt.hlines(0, ff_df.index.loc[0], ff_df['date'].iloc[-1], linestyles='dashed')
 #    plt.vlines(ff_df['Index'].iloc[-14],-500,500, linestyles='dashed')
     plt.title('Fitness-Fatigue model')
