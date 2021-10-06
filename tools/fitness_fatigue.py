@@ -135,6 +135,56 @@ def banister(ff_df, params, workload='distance'):
     # return ff_df.drop(['fatigue', 'fitness'], axis=1)
 
 
+def calvert(ff_df, workload='distance'):
+    '''
+    Model the original Calvert (1976) equation on the input workload parameters
+    using the three-component model
+
+    See:
+    Calvert, T. W., Banister, E. W., Savage, M. V., & Bach, T. (1976). A Systems 
+    Model of the Effects of Training on Physical Performance. IEEE Transactions 
+    on Systems, Man and Cybernetics, SMC-6(2), 94–102. 
+    https://doi.org/10.1109/TSMC.1976.5409179
+    
+    Model parameters are set
+
+    Input: ff_df : pandas.dataframe with days since first upload and aggregated
+            workload per day.
+            workload : name of the workload variable in ff_df
+
+    output: ff_df with addition of calvert_workload
+    '''
+    tau_1 = 50
+    tau_2 = 5
+    tau_3 = 15
+    K = 2  # Also the value of 10 is mentioned
+
+    calvert_workload = 'calvert_' + workload
+
+    ff_df['fitness_1'] = np.zeros(len(ff_df))
+    ff_df['fitness_2'] = np.zeros(len(ff_df))
+    ff_df['fitness'] = np.zeros(len(ff_df))
+    ff_df['fatigue'] = np.zeros(len(ff_df))
+    ff_df[calvert_workload] = np.zeros(len(ff_df))
+
+    for i in range(len(ff_df)):
+        if i == 0:
+            ff_df['fitness_1'][0] = 0 + (ff_df[workload][0])
+            ff_df['fitness_2'][0] = 0 + (ff_df[workload][0])
+            ff_df['fitness'][0] = ff_df['fitness_1'][0] - ff_df['fitness_2'][0]
+            ff_df['fatigue'][0] = 0 + (ff_df[workload][0])
+            ff_df[calvert_workload][0] = 0
+        else:
+            ff_df['fitness_1'][i] = ff_df['fitness_1'][i-1]*(np.exp(-1/tau_1)) + ff_df[workload][i]
+            ff_df['fitness_2'][i] = ff_df['fitness_2'][i-1]*(np.exp(-1/tau_2)) + ff_df[workload][i]
+            ff_df['fitness'][i] = ff_df['fitness_1'][i] - ff_df['fitness_2'][i]
+            ff_df['fatigue'][i] = ff_df['fatigue'][i-1]*(np.exp(-1/tau_3)) + ff_df[workload][i]
+            ff_df[calvert_workload][i] = ff_df['fitness'][i-1] - K*ff_df['fatigue'][i-1]
+     
+    return ff_df.drop(['fitness_1', 'fitness_2'], axis=1)
+    # return ff_df
+
+
 def ACWR(ff_df, params, workload):
     '''
     Model the acute:chronice workload ratio (ACWR)
@@ -190,10 +240,14 @@ def make_plot(ff_df):
 model = 'banister'
 workload = 'banister_trimp'
 params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
-# ff_df = create_ff_df(df_acts)
-ff_df = busso(ff_df, params, 'banister_trimp')
+ff_df = create_ff_df(df_acts)
+ff_df = trainingspeaks(ff_df, params, 'impulse')
+ff_df = calvert(ff_df, 'banister_trimp')
 
-plt.plot(ff_df['trainingspeaks_banister_trimp'])
+plt.plot(ff_df['calvert_banister_trimp'], label='form')
+plt.plot(ff_df['fitness'], label='fitness')
+plt.plot(ff_df['fatigue'], label='fatigue')
 plt.xticks(rotation=45)
 plt.subplots_adjust(bottom=0.2)
+plt.legend()
 #plt.title(model)
