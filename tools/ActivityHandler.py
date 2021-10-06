@@ -33,7 +33,7 @@ class ActivityHandler(object):
             if checktime.tm_min % 15 == 0:
                 print('Continuing syncing')
                 LimitFlag = 0
-                
+    
     def __setdatatypes(self, df):
         # alternative in case of errors df["start_date"] = df["start_date"].astype("datetime64")
         # alternative in case of errors df['moving_time'] = df["start_date"].astype('timedelta64[s]')
