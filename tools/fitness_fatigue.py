@@ -104,7 +104,11 @@ def banister(ff_df, params, workload='distance'):
     Model the original banister equation on the input workload parameters
 
     Model equations according to equation 10/11 from
-    B. S. Hemingway, L. Greig, and P. Swinton, “A NARRATIVE REVIEW OF MATHEMATICAL FITNESS-FATIGUE MODELLING FOR APPLICATIONS IN EXERCISE SCIENCE: MODEL DYNAMICS, METHODS, LIMITATIONS, AND FUTURE RECOMMENDATIONS A,” 2020, doi: 10.31236/osf.io/ap75j.
+    B. S. Hemingway, L. Greig, and P. Swinton, “A NARRATIVE REVIEW OF
+    MATHEMATICAL FITNESS-FATIGUE MODELLING FOR APPLICATIONS IN EXERCISE
+    SCIENCE: MODEL DYNAMICS, METHODS, LIMITATIONS, AND FUTURE
+    RECOMMENDATIONS A,” 2020, doi: 10.31236/osf.io/ap75j.
+
     fitness/fatigue = Value yesterday*exp(param) + workload
 
     Input: ff_df : pandas.dataframe with days since first upload and aggregated
@@ -130,7 +134,7 @@ def banister(ff_df, params, workload='distance'):
             ff_df['fitness'][i] = ff_df['fitness'][i-1]*(np.exp(-1/params[0])) + ff_df[workload][i]
             ff_df['fatigue'][i] = ff_df['fatigue'][i-1]*(np.exp(-1/params[1])) + ff_df[workload][i]
             ff_df[banister_workload][i] = ff_df['fitness'][i-1] - ff_df['fatigue'][i-1]
-     
+
     return ff_df
     # return ff_df.drop(['fatigue', 'fitness'], axis=1)
 
@@ -141,11 +145,11 @@ def calvert(ff_df, workload='distance'):
     using the three-component model
 
     See:
-    Calvert, T. W., Banister, E. W., Savage, M. V., & Bach, T. (1976). A Systems 
-    Model of the Effects of Training on Physical Performance. IEEE Transactions 
-    on Systems, Man and Cybernetics, SMC-6(2), 94–102. 
+    Calvert, T. W., Banister, E. W., Savage, M. V., & Bach, T. (1976). A Systems
+    Model of the Effects of Training on Physical Performance. IEEE Transactions
+    on Systems, Man and Cybernetics, SMC-6(2), 94–102.
     https://doi.org/10.1109/TSMC.1976.5409179
-    
+
     Model parameters are set
 
     Input: ff_df : pandas.dataframe with days since first upload and aggregated
@@ -180,7 +184,7 @@ def calvert(ff_df, workload='distance'):
             ff_df['fitness'][i] = ff_df['fitness_1'][i] - ff_df['fitness_2'][i]
             ff_df['fatigue'][i] = ff_df['fatigue'][i-1]*(np.exp(-1/tau_3)) + ff_df[workload][i]
             ff_df[calvert_workload][i] = ff_df['fitness'][i-1] - K*ff_df['fatigue'][i-1]
-     
+
     return ff_df.drop(['fitness_1', 'fitness_2'], axis=1)
     # return ff_df
 
@@ -193,9 +197,9 @@ def ACWR(ff_df, params, workload):
             workload per day.
             params : model parameters for decay of fitness and fatigue
             workload : name of the workload variable in ff_df
-  
+
     output: ff_df with addition of acwr_workload
-    '''    
+    '''
     ACWR_workload = 'ACWR_' + workload
 
     ff_df['CL'] = np.zeros(len(ff_df))
@@ -206,7 +210,7 @@ def ACWR(ff_df, params, workload):
         if i <= params[0] and i <= params[1]:
             ff_df['CL'][i] = sum(ff_df[workload][0:i])
             ff_df['AL'][i] = sum(ff_df[workload][0:i])
-  
+
         elif i <= params[0] and i > params[1]:
             ff_df['CL'][i] = sum(ff_df[workload][0:i])
             ff_df['AL'][i] = sum(ff_df[workload][i-params[1]:i])
@@ -237,9 +241,10 @@ def make_plot(ff_df):
     plt.subplots_adjust(bottom=0.2)
     plt.legend()
 
+
 model = 'banister'
 workload = 'banister_trimp'
-params = [42, 7] # [fitness, fatigue], [42, 7] as starting point
+params = [42, 7]  # [fitness, fatigue], [42, 7] as starting point
 ff_df = create_ff_df(df_acts)
 ff_df = trainingspeaks(ff_df, params, 'impulse')
 ff_df = calvert(ff_df, 'banister_trimp')
@@ -250,4 +255,3 @@ plt.plot(ff_df['fatigue'], label='fatigue')
 plt.xticks(rotation=45)
 plt.subplots_adjust(bottom=0.2)
 plt.legend()
-#plt.title(model)
