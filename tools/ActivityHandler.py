@@ -165,7 +165,7 @@ class ActivityHandler(object):
             
             df_features = df_features.append(entry, ignore_index=True)
 
-            if self.__ApiLimitCounter > 595:
+            if self.__ApiLimitCounter > 195:
                 self.__waitAPIlimits()
                 
         df = pd.concat([df, df_features], axis=1)
