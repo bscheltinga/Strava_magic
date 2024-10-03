@@ -16,7 +16,7 @@ def create_kml(usertoken, df):
     for a, row in tqdm(df.iterrows(), total=df.shape[0], desc='Creating KML file'):
 
         limit_count += 1
-        if limit_count > (580 * i_lim):  # To prevent exceeding strava limits
+        if limit_count > (95 * i_lim):  # To prevent exceeding strava limits
             LimitFlag = 1
             i_lim += 1
             print('Waiting for STRAVA API limits.')
